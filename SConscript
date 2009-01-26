@@ -3,6 +3,7 @@
 tools = Split("""
 qt4
 profilerdds
+doxygen
 """)
 
 env = Environment(tools = ['default'] + tools)
@@ -14,6 +15,12 @@ sources = Split("""
 main.cpp
 """)
 
-p = env.Program('profilerscope', sources)
-Default(p)
+headers = Split("""
+""")
+
+html = env.Apidocs(sources + headers, DOXYFILE_FILE = "#/Doxyfile")
+
+profilerscope = env.Program('profilerscope', sources)
+
+Default(profilerscope, html)
 
