@@ -2,7 +2,7 @@
 
 tools = Split("""
 qt4
-ddssvc
+profilerdds
 """)
 
 env = Environment(tools = ['default'] + tools)

@@ -5,10 +5,17 @@
  *      Author: martinc
  */
 
-#include "DDSQtReader.h"
+//#include "DDSQtReader.h"
+
+#include "DDSSubscriber.h"
+#include "QtTSReader.h"
 
 int
 main (int argc, char** argv) {
-	//DDSQtReader<TSReader, ProfilerDDS::TimeSeries)> reader;
+
+	DDSSubscriber subscriber(argc, argv);
+
+	QtTSReader test(subscriber, std::string("ProfilerTS"), 100.0);
+
 	return 0;
 }
