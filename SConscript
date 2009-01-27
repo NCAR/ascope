@@ -18,7 +18,7 @@ main.cpp
 headers = Split("""
 """)
 
-html = env.Apidocs(sources + headers, DOXYFILE_FILE = "#/Doxyfile")
+html = env.Apidocs(sources + headers, DOXYFILE_FILE = "Doxyfile")
 
 profilerscope = env.Program('profilerscope', sources)
 
