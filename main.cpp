@@ -14,6 +14,7 @@
 
 #include "DDSSubscriber.h"
 #include "ScopeTSReader.h"
+#include "ProfilerScope.h"
 
 std::string _ORB;                ///< path to the ORB configuration file.
 std::string _DCPS;               ///< path to the DCPS configuration file.
@@ -119,10 +120,16 @@ main (int argc, char** argv) {
 
 	QApplication app(argc, argv);
 
-	ScopeTSReader test(subscriber, _tsTopic, 1.0);
+	// create the data source reader
+	ScopeTSReader reader(subscriber, _tsTopic, 1.0);
 
-	QPushButton start("Start");
-	start.show();
+	// create the scope
+	ProfilerScope scope(&reader);
+	scope.show();
+
+	// connect them
+	scope.connect(&reader, SIGNAL(newItem(ProfilerDDS::TimeSeries*)),
+			&scope, SLOT(newTSItemSlot(ProfilerDDS::TimeSeries*)));
 
 	return app.exec();
 }

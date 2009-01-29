@@ -11,6 +11,14 @@
 #include "DDSSubscriber.h"
 #include "QtTSReader.h"
 
+/// ScopeTSReader subclasses QtTSReader and monitors the
+/// incoming time series sample stream, emitting diagnostic
+/// signals.
+///
+/// The real end user of the time series samples must connect
+/// to the QtTSReader::newItem(ProfilerDDS::TimeSeries*) signal
+/// and harvest the DDS samples, and then return them via returnItem()
+/// when finished.
 class ScopeTSReader: public QtTSReader {
 	Q_OBJECT
 public:
@@ -22,13 +30,15 @@ public:
 	/// Destructor
 	virtual ~ScopeTSReader();
 
-public slots:
-    /// This slot will be connected to the newItem()
-    /// signal from QtTSReader().
-    /// @todo It will do what with each sample? However,
-    /// it will return the item.
-    void newItemSlot(ProfilerDDS::TimeSeries* pItem);
+signals:
 
+private slots:
+    /// This slot will be connected to the newItem()
+    /// signal from QtTSReader(). It provides a place
+    /// place for ScopeTSReader to monitor or react to
+    /// the time series sample stream. However, it is
+    /// not repsonsible for returning the pItem.
+    void newItemSlot(ProfilerDDS::TimeSeries* pItem);
 
 };
 #endif /* SCOPETSREADER_H_ */

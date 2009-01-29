@@ -16,10 +16,12 @@ env.EnableQt4Modules(qt4modules)
 sources = Split("""
 main.cpp
 ScopeTSReader.cpp
+ProfilerScope.cpp
 """)
 
 headers = Split("""
 ScopeTSReader.h
+ProfilerScope.h
 """)
 
 html = env.Apidocs(sources + headers, DOXYFILE_FILE = "Doxyfile")
