@@ -5,6 +5,7 @@ qt4
 profilerdds
 doxygen
 qtt_qtconfig
+qtt_scopeplot
 boost_program_options
 """)
 
