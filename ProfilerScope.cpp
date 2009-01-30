@@ -33,10 +33,11 @@ void ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 	Q.resize(gates*tsLength);
 	
 	int index = 0;
-	for (unsigned int g = 0; g < gates; g++) {
-		for (unsigned int t = 0; t < tsLength; t++) {
-			I[g*tsLength + t] = pItem->tsdata[index++];
-			Q[g*tsLength + t] = pItem->tsdata[index++];
+	int c = 0;
+	for (int g = 0; g < gates; g++) {
+		for (int t = 0; t < tsLength; t++) {
+			I[c*gates*tsLength + g*tsLength + t] = pItem->tsdata[index++];
+			Q[c*gates*tsLength + g*tsLength + t] = pItem->tsdata[index++];
 		}
 	}
 
