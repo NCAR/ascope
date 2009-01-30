@@ -9,9 +9,10 @@
 #define PROFILERSCOPE_H_
 
 #include <QWidget>
+#include "ScopePlot.h"
 #include "TSReader.h"
 
-class ProfilerScope: public QWidget {
+class ProfilerScope: public ScopePlot {
 	Q_OBJECT
 public:
 	ProfilerScope(TSReader* reader, QWidget* parent=0);
