@@ -27,11 +27,11 @@ void ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 	int gates = pItem->hskp.gates;
 	int channels = pItem->hskp.numChannels;
 	int tsLength = pItem->hskp.tsLength;
-	
+
 	std::vector<double> I, Q;
 	I.resize(gates*tsLength);
 	Q.resize(gates*tsLength);
-	
+
 	int c = 0;
 	int index = c*gates*tsLength*2;
 	for (int g = 0; g < gates; g++) {
@@ -41,12 +41,12 @@ void ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 		}
 	}
 
-	this->TimeSeries(I, Q, -100.0, 100.0, 1.0, "i", "I&Q");
-	std::cout << "Returning a time series."
-	    << " tsdata size:" << size
-	    << " Current dropped samples:" << _tsReader->droppedSamples()
-		<< " Current number of samples:" << _tsReader->numSamples()
-		<< std::endl;
+	this->TimeSeries(I, Q, -16000.0, 16000.0, 1.0, "i", "I&Q");
+	//std::cout << "Returning a time series."
+	//    << " tsdata size:" << size
+	//    << " Current dropped samples:" << _tsReader->droppedSamples()
+	//	<< " Current number of samples:" << _tsReader->numSamples()
+	//	<< std::endl;
 
 	_tsReader->returnItem(pItem);
 }

@@ -121,7 +121,7 @@ main (int argc, char** argv) {
 	QApplication app(argc, argv);
 
 	// create the data source reader
-	ScopeTSReader reader(subscriber, _tsTopic, 1.0);
+	ScopeTSReader reader(subscriber, _tsTopic, 50.0);
 
 	// create the scope
 	ProfilerScope scope(&reader);
