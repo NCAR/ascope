@@ -13,7 +13,7 @@
 #include <ArgvParams.h>
 
 #include "DDSSubscriber.h"
-#include "ScopeTSReader.h"
+#include "QtTSReader.h"
 #include "ProfilerScope.h"
 
 std::string _ORB;                ///< path to the ORB configuration file.
@@ -121,7 +121,7 @@ main (int argc, char** argv) {
 	QApplication app(argc, argv);
 
 	// create the data source reader
-	ScopeTSReader reader(subscriber, _tsTopic, 50.0);
+	QtTSReader reader(subscriber, _tsTopic, 50.0);
 
  	// create the scope
 	ProfilerScope scope;

@@ -21,13 +21,11 @@ env.Uic4(['ProfilerScope.ui',])
 
 sources = Split("""
 main.cpp
-ScopeTSReader.cpp
 ProfilerScope.cpp
 PlotInfo.cpp
 """)
 
 headers = Split("""
-ScopeTSReader.h
 ProfilerScope.h
 PlotInfo.h
 """)
