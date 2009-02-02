@@ -1,7 +1,7 @@
 #ifndef PROFILERSCOPE_H_
 #define PROFILERSCOPE_H_
 
-#include <QDialog>
+#include <QWidget>
 #include <QPalette>
 #include <qevent.h>
 #include <deque>
@@ -20,15 +20,15 @@
 // PlotInfo knows the characteristics of a plot
 #include "PlotInfo.h"
 
-/** 
- EldoraScope provides a traditional real-time Ascope display of 
+/**
+ EldoraScope provides a traditional real-time Ascope display of
  eldora time series data and computed products. It is implmented
  with Qt, and uses the QtToolbox::ScopePlot as the primary display.
  I&Q, I versus Q, IQ power spectrum, and computed product displays
  are user selectable. The data can be displayed either along the beam
- for all gates, or in time for one gate. Users may select the 
+ for all gates, or in time for one gate. Users may select the
  fft block size and the gate to be displayed.
- 
+
  EldoraScope is simply a data consumer; it does not know
  anything about the data provider. Signals and slots
  used to coordinate with other components. Data are expected
@@ -36,12 +36,12 @@
  mode. EldoraScope announces the mode by emitting either
  an alongBeam signal or a oneGate signal. Data are then delivered
  to EldoraScope by calling the newTimeSeriesSlot() and newProductSlot().
- 
+
  It is the responsibility of the data provider to feed data
  at a desired rate. EldoraScope will attempt to render all data
  delivered to newTimeSeriesSlot() and newProductSlot().
  **/
-class ProfilerScope : public QDialog, public Ui::ProfilerScope {
+class ProfilerScope : public QWidget, private Ui::ProfilerScope {
     Q_OBJECT
         /// types of plots available in the scope plot.
         enum SCOPE_PLOT_TYPES {
@@ -54,21 +54,21 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
         enum TS_PLOT_TYPES {
             TS_TIMESERIES_PLOT, ///<  time series I and Q plot
             TS_IVSQ_PLOT,       ///<  time series I versus Q plot
-            TS_SPECTRUM_PLOT    ///<  time series power spectrum plot 
+            TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
         };
 
      public:
         ProfilerScope(
-                QDialog* parent = 0);
+                QWidget* parent = 0);
         virtual ~ProfilerScope();
 
     signals:
 
     public slots:
-        /// Feed new timeseries data via this slot. The data 
+        /// Feed new timeseries data via this slot. The data
         /// vectors must be of the same length and non-zero; otherwise they
         /// will be ignored. The vector lengths can change between calls,
-        /// and the plot will respond appropriately. If the plot is currently 
+        /// and the plot will respond appropriately. If the plot is currently
         /// configured for a time series display (I&Q, IvsQ or spectrum), the
         /// new data will be displayed.
         /// @param I A vector I values
@@ -80,15 +80,15 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
                     std::vector<double> Q,
                     double sampleRateHz,
                     double tuningFreqHz);
-        /// Call when the plot type is changed. This function 
+        /// Call when the plot type is changed. This function
         /// must determine which of the two families of
         /// plots, _tsPlotInfo, or _productPlotInfo, the
         /// previous and new plot types belong to.
         virtual void plotTypeSlot(
                 int plotType);
         /// call to save the current plotting parameters for the
-        /// current plot type, and reload the parameters for the 
-        /// the new plot type. 
+        /// current plot type, and reload the parameters for the
+        /// the new plot type.
         void plotTypeChange(
                 PlotInfo* pi,
                     TS_PLOT_TYPES plotType);
@@ -103,7 +103,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
         virtual void upSlot();
         /// Slide the plot down.
         virtual void dnSlot();
-        /// Initiate an autoscale. A flag is set; during the next 
+        /// Initiate an autoscale. A flag is set; during the next
         /// pulse reception an autoscale computation is made.
         virtual void autoScaleSlot();
         /// Save the scope display to a PNG file.
@@ -182,7 +182,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
         std::vector<QButtonGroup*> _tabButtonGroups;
         /// This set contains PLOTTYPEs for all raw data plots
         std::set<TS_PLOT_TYPES> _pulsePlots;
-        /// Holds I data to display for time series and I vs. Q 	
+        /// Holds I data to display for time series and I vs. Q
         std::vector<double> I;
         /// Holds Q data to display for time series and I vs. Q display
         std::vector<double> Q;
@@ -199,7 +199,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
                 QTimerEvent*);
         /// The hamming window coefficients
         std::vector<double> _hammingCoefs;
-        /// The index of the current fft/block size 
+        /// The index of the current fft/block size
         /// selection in _blockSizeChoices
         int _blockSizeIndex;
         /// The possible block/fftw size choices.
@@ -208,7 +208,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
         ///	the fftw routines.
         std::vector<fftw_plan> _fftwPlan;
         ///	The fftw data array. The fft will
-        //	be performed in place, so both input data 
+        //	be performed in place, so both input data
         ///	and results are stored here.
         std::vector<fftw_complex*> _fftwData;
         //	power correction factor applied to (uncorrected) powerSpectrum() output
@@ -222,7 +222,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
                 std::vector<double>& Idata,
                     std::vector<double>& Qdata);
         /// Compute the power spectrum. The input values will come
-        /// I[]and Q[], the power spectrum will be written to 
+        /// I[]and Q[], the power spectrum will be written to
         /// _spectrum[]
         /// @param Idata The I time series.
         /// @param Qdata The Q time series.
@@ -243,7 +243,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
         /// _tsPlotInfo provides the label information for
         /// the radio buttons.
         /// @param tabName The title for the tab.
-        /// @param types A set of the desired TS_PLOT_TYPES types 
+        /// @param types A set of the desired TS_PLOT_TYPES types
         /// @return The button group that the inserted buttons
         /// belong to.
         QButtonGroup* addTSTypeTab(
@@ -262,7 +262,7 @@ class ProfilerScope : public QDialog, public Ui::ProfilerScope {
         QPalette _redPalette;
         /// Set true if the plot graphics are paused
         bool _paused;
-        /// A list of available gates. This is set via the 
+        /// A list of available gates. This is set via the
         /// gateList slot.
         std::vector<int> _gates;
         /// The choice of channels (1-4)

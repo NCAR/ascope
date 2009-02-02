@@ -7,7 +7,7 @@
 #include <QButtonGroup>
 #include <QLabel>
 #include <QTimer>
-#include <QSpinBox>	
+#include <QSpinBox>
 #include <QLCDNumber>
 #include <QSlider>
 #include <QLayout>
@@ -30,13 +30,13 @@
 
 //////////////////////////////////////////////////////////////////////
 ProfilerScope::ProfilerScope(
-        QDialog* parent) :
-    QDialog(parent), 
+        QWidget* parent) :
+    QWidget(parent),
     _statsUpdateInterval(5),
             _timeSeriesPlot(TRUE), _config("NCAR", "ProfilerScope"),
             _paused(false), _zeroMoment(0.0){
     // Set up our form
-    setupUi(parent);
+    setupUi(this);
 
     return;
 
@@ -89,7 +89,7 @@ ProfilerScope::ProfilerScope(
     _yGrid->setChecked(true);
 
     // initialize the book keeping for the plots.
-    // This also sets up the radio buttons 
+    // This also sets up the radio buttons
     // in the plot type tab widget
     //initPlots();
 
@@ -115,14 +115,14 @@ ProfilerScope::ProfilerScope(
 
     // The initial plot type will be I and Q timeseries
     //plotTypeSlot(TS_TIMESERIES_PLOT);
-    
+
 
     // start the statistics timer
     //startTimer(_statsUpdateInterval*1000);
-    
+
     // let the data sources get themselves ready
     sleep(1);
-    
+
 }
 //////////////////////////////////////////////////////////////////////
 ProfilerScope::~ProfilerScope() {
@@ -146,7 +146,7 @@ void ProfilerScope::initFFT() {
         _blockSizeIndex = 0;
     _blockSizeCombo->setCurrentIndex(_blockSizeIndex);
 
-    //  set up fft for power calculations: 
+    //  set up fft for power calculations:
     _fftwData.resize(_blockSizeChoices.size());
     _fftwPlan.resize(_blockSizeChoices.size());
     for (unsigned int i = 0; i < _blockSizeChoices.size(); i++) {
@@ -155,11 +155,11 @@ void ProfilerScope::initFFT() {
         _fftwData[i] = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)
                 * blockSize);
         // create the plan.
-        _fftwPlan[i] = fftw_plan_dft_1d(blockSize, _fftwData[i], _fftwData[i], 
-        FFTW_FORWARD, 
+        _fftwPlan[i] = fftw_plan_dft_1d(blockSize, _fftwData[i], _fftwData[i],
+        FFTW_FORWARD,
         FFTW_ESTIMATE);
     }
-    
+
     // create the hamming coefficients
     hammingSetup();
 }
@@ -416,7 +416,7 @@ void ProfilerScope::initPlots() {
     pGroup = addTSTypeTab("I & Q", _pulsePlots);
     _tabButtonGroups.push_back(pGroup);
 
-    connect(_typeTab, SIGNAL(currentChanged(QWidget *)), 
+    connect(_typeTab, SIGNAL(currentChanged(QWidget *)),
             this, SLOT(tabChangeSlot(QWidget*)));
 }
 
@@ -604,9 +604,9 @@ void ProfilerScope::adjustGainOffset(
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::autoScaleSlot() {
     PlotInfo* pi;
-    
+
     pi = &_tsPlotInfo[_tsPlotType];
-    
+
     pi->autoscale(true);
 }
 
@@ -632,7 +632,7 @@ void ProfilerScope::gateChoiceSlot(
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::blockSizeSlot(
         int index) {
-    
+
 	_blockSizeIndex = index;
 
     // recalculate the hamming coefficients. _blockSizeIndex
@@ -660,7 +660,7 @@ double ProfilerScope::zeroMomentFromTimeSeries(
 ////////////////////////////////////////////////////////////////////////
 void
 ProfilerScope::doHamming() {
-	
+
   int blockSize = _blockSizeChoices[_blockSizeIndex];
 
   for (int i = 0; i < blockSize; i++) {
@@ -672,9 +672,9 @@ ProfilerScope::doHamming() {
 
 void
 ProfilerScope::hammingSetup() {
-	
+
    int blockSize = _blockSizeChoices[_blockSizeIndex];
-    
+
   _hammingCoefs.resize(blockSize);
 
   for (int i = 0; i < blockSize; i++) {

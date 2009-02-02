@@ -1,6 +1,6 @@
 <ui version="4.0" >
  <class>ProfilerScope</class>
- <widget class="QDialog" name="ProfilerScope" >
+ <widget class="QWidget" name="ProfilerScope" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -12,210 +12,168 @@
   <property name="windowTitle" >
    <string>ProfilerScope</string>
   </property>
-  <widget class="QLabel" name="_powerDB" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>566</y>
-     <width>429</width>
-     <height>17</height>
-    </rect>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>9</number>
    </property>
-   <property name="text" >
-    <string>0</string>
+   <property name="spacing" >
+    <number>6</number>
    </property>
-  </widget>
-  <widget class="QCheckBox" name="_pauseButton" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>68</y>
-     <width>429</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Pause</string>
-   </property>
-  </widget>
-  <widget class="QGroupBox" name="groupBox" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>442</y>
-     <width>429</width>
-     <height>62</height>
-    </rect>
-   </property>
-   <property name="title" >
-    <string>Channel</string>
-   </property>
-   <layout class="QHBoxLayout" >
-    <property name="margin" >
-     <number>9</number>
-    </property>
-    <property name="spacing" >
-     <number>6</number>
-    </property>
-    <item>
-     <widget class="QRadioButton" name="_chan1" >
-      <property name="text" >
-       <string>0</string>
-      </property>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="_pauseButton" >
+         <property name="text" >
+          <string>Pause</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="_windowButton" >
+         <property name="text" >
+          <string>Windowing</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" >
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="spacing" >
+        <number>6</number>
+       </property>
+       <item>
+        <widget class="QCheckBox" name="_xGrid" >
+         <property name="text" >
+          <string>X Grid</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="_yGrid" >
+         <property name="text" >
+          <string>Y Grid</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTabWidget" name="_typeTab" >
+     <property name="currentIndex" >
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab" >
+      <attribute name="title" >
+       <string>Tab 1</string>
+      </attribute>
      </widget>
-    </item>
-    <item>
-     <widget class="QRadioButton" name="_chan2" >
-      <property name="text" >
-       <string>1</string>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox" >
+     <property name="title" >
+      <string>Channel</string>
+     </property>
+     <layout class="QHBoxLayout" >
+      <property name="margin" >
+       <number>9</number>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QRadioButton" name="_chan3" >
-      <property name="text" >
-       <string>2</string>
+      <property name="spacing" >
+       <number>6</number>
       </property>
-     </widget>
-    </item>
-    <item>
-     <widget class="QRadioButton" name="_chan4" >
-      <property name="text" >
-       <string>3</string>
-      </property>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QComboBox" name="_blockSizeCombo" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>538</y>
-     <width>429</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="_autoScale" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>589</y>
-     <width>429</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Auto Scale</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="_gateNumber" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>510</y>
-     <width>429</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QTabWidget" name="_typeTab" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>124</y>
-     <width>429</width>
-     <height>312</height>
-    </rect>
-   </property>
-   <property name="currentIndex" >
-    <number>0</number>
-   </property>
-   <widget class="QWidget" name="tab" >
-    <attribute name="title" >
-     <string>Tab 1</string>
-    </attribute>
-   </widget>
-  </widget>
-  <widget class="QToolButton" name="_dn" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>687</y>
-     <width>33</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>dn</string>
-   </property>
-  </widget>
-  <widget class="QToolButton" name="_up" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>655</y>
-     <width>33</width>
-     <height>26</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>up</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="_windowButton" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>96</y>
-     <width>429</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Windowing</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="_saveImage" >
-   <property name="geometry" >
-    <rect>
-     <x>10</x>
-     <y>622</y>
-     <width>429</width>
-     <height>27</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Save Image</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="_xGrid" >
-   <property name="geometry" >
-    <rect>
-     <x>11</x>
-     <y>11</y>
-     <width>427</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>X Grid</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="_yGrid" >
-   <property name="geometry" >
-    <rect>
-     <x>11</x>
-     <y>39</y>
-     <width>427</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="text" >
-    <string>Y Grid</string>
-   </property>
-  </widget>
+      <item>
+       <widget class="QRadioButton" name="_chan1" >
+        <property name="text" >
+         <string>0</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="_chan2" >
+        <property name="text" >
+         <string>1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="_chan3" >
+        <property name="text" >
+         <string>2</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="_chan4" >
+        <property name="text" >
+         <string>3</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QComboBox" name="_gateNumber" />
+   </item>
+   <item>
+    <widget class="QComboBox" name="_blockSizeCombo" />
+   </item>
+   <item>
+    <widget class="QLabel" name="_powerDB" >
+     <property name="text" >
+      <string>0</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="_autoScale" >
+     <property name="text" >
+      <string>Auto Scale</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="_saveImage" >
+     <property name="text" >
+      <string>Save Image</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="_up" >
+     <property name="text" >
+      <string>up</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="_dn" >
+     <property name="text" >
+      <string>dn</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>
