@@ -39,6 +39,10 @@ private slots:
     /// the time series sample stream. However, it is
     /// not repsonsible for returning the pItem.
     void newItemSlot(ProfilerDDS::TimeSeries* pItem);
+    /// Use this slot to return an item
+    /// @param pItem the item to be returned.
+    void returnItemSlot(ProfilerDDS::TimeSeries* pItem);
+    
 
 };
 #endif /* SCOPETSREADER_H_ */

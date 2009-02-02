@@ -71,15 +71,15 @@ ProfilerScope::ProfilerScope(
 
     // connect the controls
     connect(_autoScale, SIGNAL(released()), this, SLOT(autoScaleSlot()));
-//    connect(_gainKnob, SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
+    connect(_gainKnob, SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
     connect(_up, SIGNAL(released()), this, SLOT(upSlot()));
     connect(_dn, SIGNAL(released()), this, SLOT(dnSlot()));
     connect(_saveImage, SIGNAL(released()), this, SLOT(saveImageSlot()));
     connect(_pauseButton, SIGNAL(toggled(bool)), this, SLOT(pauseSlot(bool)));
     connect(_windowButton, SIGNAL(toggled(bool)), this, SLOT(windowSlot(bool)));
     connect(_gateNumber, SIGNAL(activated(int)), this, SLOT(gateChoiceSlot(int)));
-//    connect(_xGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableXgrid(bool)));
-//    connect(_yGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableYgrid(bool)));
+    connect(_xGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableXgrid(bool)));
+    connect(_yGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableYgrid(bool)));
     connect(_blockSizeCombo, SIGNAL(activated(int)), this, SLOT(blockSizeSlot(int)));
     connect(channelButtonGroup, SIGNAL(buttonReleased(int)), this, SLOT(channelSlot(int)));
 
@@ -93,12 +93,12 @@ ProfilerScope::ProfilerScope(
     // in the plot type tab widget
     //initPlots();
 
-//    _gainKnob->setRange(-7, 7);
-//    _gainKnob->setTitle("Gain");
+    _gainKnob->setRange(-7, 7);
+    _gainKnob->setTitle("Gain");
 
     // set the minor ticks
-//    _gainKnob->setScaleMaxMajor(5);
-//    _gainKnob->setScaleMaxMinor(5);
+    _gainKnob->setScaleMaxMajor(5);
+    _gainKnob->setScaleMaxMinor(5);
 
     _xyGraphRange = 1;
     _xyGraphCenter = 0.0;
@@ -114,11 +114,11 @@ ProfilerScope::ProfilerScope(
     _redPalette.setColor(this->backgroundRole(), QColor("red"));
 
     // The initial plot type will be I and Q timeseries
-    //plotTypeSlot(TS_TIMESERIES_PLOT);
+    plotTypeSlot(TS_TIMESERIES_PLOT);
 
 
     // start the statistics timer
-    //startTimer(_statsUpdateInterval*1000);
+    startTimer(_statsUpdateInterval*1000);
 
     // let the data sources get themselves ready
     sleep(1);
@@ -384,7 +384,7 @@ void ProfilerScope::plotTypeChange(
     _xyGraphCenter = pi->getOffsetCurrent();
 
     // set the knobs for the new plot type
-//    _gainKnob->setValue(_knobGain);
+    _gainKnob->setValue(_knobGain);
 
      _tsPlotType = newPlotType;
 
@@ -498,7 +498,7 @@ void ProfilerScope::gainChangeSlot(
 
     _xyGraphRange = pow(10.0, -gain);
 
-//    _gainKnob->setValue(gain);
+    _gainKnob->setValue(gain);
 
 }
 
@@ -597,10 +597,16 @@ void ProfilerScope::adjustGainOffset(
         	_xyGraphRange = 1.0;
         //std::cout << "min:"<<min<<"  max:"<<max<<"     _xxGraphRange is " << _xyGraphRange << "\n";
         _knobGain = -log10(_xyGraphRange);
-//        _gainKnob->setValue(_knobGain);
+        _gainKnob->setValue(_knobGain);
     }
 }
 
+
+//////////////////////////////////////////////////////////////////////
+void
+ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
+	emit returnTSItem(pItem);
+}
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::autoScaleSlot() {
     PlotInfo* pi;

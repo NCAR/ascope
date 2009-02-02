@@ -8,6 +8,7 @@ qtt_knob
 profilerdds
 doxygen
 fftw
+boost_program_options
 """)
 
 env = Environment(tools = ['default'] + tools)
@@ -17,13 +18,6 @@ env.EnableQt4Modules(qt4modules)
 
 # This will create ui_ProfilerScope.h
 env.Uic4(['ProfilerScope.ui',])
-testsources = Split("""
-maintest.cpp
-Test.cpp
-""")
-env.Uic4(['Test.ui',])
-test = env.Program('test', testsources)
-Default(test)
 
 sources = Split("""
 main.cpp

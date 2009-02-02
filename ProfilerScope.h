@@ -20,6 +20,8 @@
 // PlotInfo knows the characteristics of a plot
 #include "PlotInfo.h"
 
+#include "TSReader.h"
+
 /**
  EldoraScope provides a traditional real-time Ascope display of
  eldora time series data and computed products. It is implmented
@@ -63,8 +65,11 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         virtual ~ProfilerScope();
 
     signals:
-
+		/// emit this signal to return a DDS TS item.
+		void returnTSItem(ProfilerDDS::TimeSeries* pItem);
+		
     public slots:
+		void newTSItemSlot(ProfilerDDS::TimeSeries* pItem);
         /// Feed new timeseries data via this slot. The data
         /// vectors must be of the same length and non-zero; otherwise they
         /// will be ignored. The vector lengths can change between calls,

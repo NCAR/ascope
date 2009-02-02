@@ -26,5 +26,11 @@ ScopeTSReader::~ScopeTSReader() {
 //////////////////////////////////////////////////////////////////////////////
 void
 ScopeTSReader::newItemSlot(ProfilerDDS::TimeSeries* pItem) {
-//	std::cout << __FUNCTION__ << " sees the item" << std::endl;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+void 
+ScopeTSReader::returnItemSlot(ProfilerDDS::TimeSeries* pItem) {
+	std::cout << "return TimeSeries\n";
+	TSReader::returnItem(pItem);
 }
