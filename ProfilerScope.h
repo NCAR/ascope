@@ -1,5 +1,5 @@
-#ifndef PROFSCOPE_H_
-#define PROFSCOPE_H_
+#ifndef PROFILERSCOPE_H_
+#define PROFILERSCOPE_H_
 
 #include <QDialog>
 #include <QPalette>
@@ -15,13 +15,10 @@
 #include "QtConfig.h"
 
 // The designer generated header file.
-#include "ui_EldoraScope.h"
+#include "ui_ProfilerScope.h"
 
 // PlotInfo knows the characteristics of a plot
 #include "PlotInfo.h"
-
-// Symbolic names for product types
-#include "ProductTypes.h"
 
 /** 
  EldoraScope provides a traditional real-time Ascope display of 
@@ -43,75 +40,30 @@
  It is the responsibility of the data provider to feed data
  at a desired rate. EldoraScope will attempt to render all data
  delivered to newTimeSeriesSlot() and newProductSlot().
-
- EldoraScope is configured via EldoraScope.ini.
  **/
-class EldoraScope : public QDialog, public Ui::EldoraScope {
+class ProfilerScope : public QDialog, public Ui::ProfilerScope {
     Q_OBJECT
-        /// The display can either show all gates along a beam, or
-        /// values in time for a selected gate.
-        enum GATE_MODE {
-            ALONG_BEAM, ///< Display all gates along a beam
-            ONE_GATE ///< Display values in time for a selected gate
-        };
-
         /// types of plots available in the scope plot.
         enum SCOPE_PLOT_TYPES {
             SCOPE_PLOT_TIMESERIES,
             SCOPE_PLOT_IVSQ,
-            SCOPE_PLOT_SPECTRUM,
-            SCOPE_PLOT_PRODUCT
+            SCOPE_PLOT_SPECTRUM
         };
 
         /// Time series plot types.
         enum TS_PLOT_TYPES {
             TS_TIMESERIES_PLOT, ///<  time series I and Q plot
-            TS_IVSQ_PLOT, ///<  time series I versus Q plot
-            TS_SPECTRUM_PLOT ///<  time series power spectrum plot 
+            TS_IVSQ_PLOT,       ///<  time series I versus Q plot
+            TS_SPECTRUM_PLOT    ///<  time series power spectrum plot 
         };
 
      public:
-        EldoraScope(
+        ProfilerScope(
                 QDialog* parent = 0);
-        virtual ~EldoraScope();
+        virtual ~ProfilerScope();
 
     signals:
 
-    /// Emitted to announce that TS data should be delivered 
-    /// in ONE_GATE mode.
-    /// @param channel The selected channel
-    /// @param gate The selected gate
-    /// @param n The number of points to deliver for the selected gate
-    void oneGateTSSignal(
-            int channel,
-                bool forwardRadar,
-                int gate,
-                int n);
-    /// emmited to indicate that TS data should be delivered for 
-    /// all gates along a beam
-    /// @param channel The selected channel
-    void alongBeamTSSignal(
-            int channel,
-            bool forwardRadar);
-    
-    /// Emitted to announce that Product data should be delivered 
-    /// in ONE_GATE mode.
-    /// @param product The selected product
-    /// @param gate The selected gate
-    /// @param n The number of points to deliver for the selected gate
-    void oneGateProductSignal(
-            PRODUCT_TYPES product,
-                bool forwardRadar,
-                int gate,
-                int n);
-    /// Emmited to indicate that Product data should be delivered for 
-    /// all gates along a beam
-    /// @param channel The selected channel
-    /// @param forwardRadar Set true if the forward radar, false otherwise.
-    void alongBeamProductSignal(
-            PRODUCT_TYPES product,
-            bool forwardRadar);
-    
     public slots:
         /// Feed new timeseries data via this slot. The data 
         /// vectors must be of the same length and non-zero; otherwise they
@@ -128,39 +80,6 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
                     std::vector<double> Q,
                     double sampleRateHz,
                     double tuningFreqHz);
-        /// Call when data is available on the product data socket.
-        /// @param p the product data
-        /// @param radarId either EldoraDDS::Fore or EldoraDDS::Aft
-        /// @param elDegrees The antenna pointing elevation, degrees
-        /// @param prodType The product type, from PRODUCT_TYPES
-        /// @param gateSpacingMeters The width in meters of each gate
-        /// @param dwellWidth The angular width of one dwell
-        /// @param airSpdCorr The airspeed correction to be added to the 
-        /// radial velocity, if desired.
-        /// @param rollAngle The aircraft roll angle.
-        /// @param nyquistVelocity The radar nyquist velocity, m/s.        
-        /// @param altitudeMSL Altitude, meters abocw sea level
-        /// @param latitude Latitude, degrees
-        /// @param longitude Longitude, degrees
-
-        void productSlot(std::vector<double> p, 
-                         int radarId, 
-                         float elDegrees, 
-                         int prodType, 
-                         float gateSpacingMeters,
-                         double dwellWidth,
-                         double airSpdCorr,
-                         double rollAngle,
-                         double nyquistVelocity,
-                         double altitudeMSL,
-                         double latitude,
-                         double longitude);
-        /// Call to set the list of available gates in the timeseries.
-        /// @param gates A list of possible gates in the timeseries. It will be zero based. 
-        /// Add firstgate to stablish the true gate number.
-        /// @param firstgate The gate number of the first gate.
-        void tsGateListSlot(
-                std::vector<int> gates, unsigned short firstgate);
         /// Call when the plot type is changed. This function 
         /// must determine which of the two families of
         /// plots, _tsPlotInfo, or _productPlotInfo, the
@@ -169,14 +88,10 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
                 int plotType);
         /// call to save the current plotting parameters for the
         /// current plot type, and reload the parameters for the 
-        /// the new plot type. It handles both pulse and beam
-        /// displays. pulsePlot is used to differentiate between the
-        /// two.
+        /// the new plot type. 
         void plotTypeChange(
                 PlotInfo* pi,
-                    TS_PLOT_TYPES plotType,
-                    PRODUCT_TYPES prodType,
-                    bool pulsePlot);
+                    TS_PLOT_TYPES plotType);
         /// A different tab has been selected. Change the plot type to the
         /// currently selected button on that tab.
         void tabChangeSlot(
@@ -197,18 +112,10 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
         /// @param p True to enable pause.
         void pauseSlot(
                 bool p);
-        /// Set the gate display mode
-        /// @param m The gate mode, either ALONG_BEAM or ONE_GATE
-        void gateModeSlot(
-                int m);
         /// Select the channel
         /// @param c The channel (1-4)
         void channelSlot(
                 int c);
-        /// Select the radar
-        /// @param forwardRadar True if forward radar, false if aft
-        void radarSlot(
-                int forwardRadar);
         /// Select the gate
         /// @param g The index from the combo box of the selected gate.
         void gateChoiceSlot(
@@ -269,22 +176,24 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
                 double min,
                     double max,
                     ScopePlot::PLOTTYPE displayType);
+        /// save the button group for each tab,
+        /// so that we can find the selected button
+        /// and change the plot type when tabs are switched.
+        std::vector<QButtonGroup*> _tabButtonGroups;
+        /// This set contains PLOTTYPEs for all raw data plots
+        std::set<TS_PLOT_TYPES> _pulsePlots;
         /// Holds I data to display for time series and I vs. Q 	
         std::vector<double> I;
         /// Holds Q data to display for time series and I vs. Q display
         std::vector<double> Q;
         /// Holds power spectrum values for display.
         std::vector<double> _spectrum;
-        /// Used to collect product data from beams
-        std::vector<double> _ProductData;
         // how often to update the statistics (in seconds)
         int _statsUpdateInterval;
         /// Set true if time series plots are selected, false for product type plots
         bool _timeSeriesPlot;
         /// The current selected plot type.
         TS_PLOT_TYPES _tsPlotType;
-        /// The current selected product type.
-        PRODUCT_TYPES _productPlotType;
         // The builtin timer will be used to calculate beam statistics.
         void timerEvent(
                 QTimerEvent*);
@@ -312,8 +221,6 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
         void processTimeSeries(
                 std::vector<double>& Idata,
                     std::vector<double>& Qdata);
-        /// Process product data
-        void processProduct(std::vector<double>& p);
         /// Compute the power spectrum. The input values will come
         /// I[]and Q[], the power spectrum will be written to 
         /// _spectrum[]
@@ -325,36 +232,12 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
                     std::vector<double>& Qdata);
         /// For each TS_PLOT_TYPES, there will be an entry in this map.
         std::map<TS_PLOT_TYPES, PlotInfo> _tsPlotInfo;
-        /// For each PRODUCT_PLOT_TYPES, there will be an entry in this map.
-        std::map<PRODUCT_TYPES, PlotInfo> _productPlotInfo;
         /// This set contains PLOTTYPEs for all timeseries plots
         std::set<TS_PLOT_TYPES> _timeSeriesPlots;
-        /// This set contains PLOTTYPEs for all raw data plots
-        std::set<TS_PLOT_TYPES> _pulsePlots;
-        /// This set contains PLOTTYPEs for all S band moments plots
-        std::set<PRODUCT_TYPES> _productPlots;
-        /// This set contains PLOTTYPEs for all X band moments plots
-        std::set<PRODUCT_TYPES> _xMomentsPlots;
-        /// save the button group for each tab,
-        /// so that we can find the selected button
-        /// and change the plot type when tabs are switched.
-        std::vector<QButtonGroup*> _tabButtonGroups;
         /// initialize all of the book keeping structures
         /// for the various plots.
         void initPlots();
-        /// add a rw plot tab to the plot type selection tab widget.
-        /// Radio buttons are created for all of specified
-        /// plty types, and grouped into one button group.
-        /// _tsPlotInfo provides the label information for
-        /// the radio buttons.
-        /// @param tabName The title for the tab.
-        /// @param types A set of the desired TS_PLOT_TYPES types 
-        /// @return The button group that the inserted buttons
-        /// belong to.
-        QButtonGroup* addProductTypeTab(
-                std::string tabName,
-                    std::set<PRODUCT_TYPES> types);
-        /// add a products tab to the plot type selection tab widget.
+        /// add a ts tab to the plot type selection tab widget.
         /// Radio buttons are created for all of specified
         /// plty types, and grouped into one button group.
         /// _tsPlotInfo provides the label information for
@@ -371,7 +254,7 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
         double zeroMomentFromTimeSeries(
                 std::vector<double>& I,
                     std::vector<double>& Q);
-        /// The configuration for EldoraScope
+        /// The configuration for ProfilerScope
         QtConfig _config;
         /// Palette for making the leds green
         QPalette _greenPalette;
@@ -379,8 +262,6 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
         QPalette _redPalette;
         /// Set true if the plot graphics are paused
         bool _paused;
-        /// The selected gate mode
-        GATE_MODE _gateMode;
         /// A list of available gates. This is set via the 
         /// gateList slot.
         std::vector<int> _gates;
@@ -391,8 +272,6 @@ class EldoraScope : public QDialog, public Ui::EldoraScope {
         /// The signal power, computed directly from the I&Q
         /// data, or from the power spectrum
         double _zeroMoment;
-        /// True if forward radar, false otherwise
-        bool _forwardRadar;
 };
 
 

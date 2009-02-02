@@ -2,11 +2,12 @@
 
 tools = Split("""
 qt4
-profilerdds
-doxygen
 qtt_qtconfig
 qtt_scopeplot
-boost_program_options
+qtt_knob
+profilerdds
+doxygen
+fftw
 """)
 
 env = Environment(tools = ['default'] + tools)
@@ -14,15 +15,20 @@ env = Environment(tools = ['default'] + tools)
 qt4modules = ['QtCore','QtGui']
 env.EnableQt4Modules(qt4modules)
 
+# This will create ui_ProfilerScope.h
+env.Uic4(['ProfilerScope.ui',])
+
 sources = Split("""
 main.cpp
 ScopeTSReader.cpp
 ProfilerScope.cpp
+PlotInfo.cpp
 """)
 
 headers = Split("""
 ScopeTSReader.h
 ProfilerScope.h
+PlotInfo.h
 """)
 
 html = env.Apidocs(sources + headers, DOXYFILE_FILE = "Doxyfile")
