@@ -9,7 +9,7 @@
 #include <map>
 #include <fftw3.h>
 
-// Coponents from the QtToolbox
+// Components from the QtToolbox
 #include "ScopePlot.h"
 #include "Knob.h"
 #include "QtConfig.h"
@@ -23,7 +23,7 @@
 #include "TSReader.h"
 
 /**
- EldoraScope provides a traditional real-time Ascope display of
+ ProfilerScope provides a traditional real-time Ascope display of
  eldora time series data and computed products. It is implmented
  with Qt, and uses the QtToolbox::ScopePlot as the primary display.
  I&Q, I versus Q, IQ power spectrum, and computed product displays
@@ -31,17 +31,13 @@
  for all gates, or in time for one gate. Users may select the
  fft block size and the gate to be displayed.
 
- EldoraScope is simply a data consumer; it does not know
+ ProfilerScope is simply a data consumer; it does not know
  anything about the data provider. Signals and slots
- used to coordinate with other components. Data are expected
- to be delivered in a mode matching the current display
- mode. EldoraScope announces the mode by emitting either
- an alongBeam signal or a oneGate signal. Data are then delivered
- to EldoraScope by calling the newTimeSeriesSlot() and newProductSlot().
+ used to coordinate with other components.
 
  It is the responsibility of the data provider to feed data
- at a desired rate. EldoraScope will attempt to render all data
- delivered to newTimeSeriesSlot() and newProductSlot().
+ at a desired rate. ProfilerScope will attempt to render all data
+ delivered.
  **/
 class ProfilerScope : public QWidget, private Ui::ProfilerScope {
     Q_OBJECT
@@ -67,25 +63,12 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
     signals:
 		/// emit this signal to return a DDS TS item.
 		void returnTSItem(ProfilerDDS::TimeSeries* pItem);
-		
+
     public slots:
+		/// Feed new timeseries data via this slot.
+		/// @param pItem The DDS Timeseries item containing the data
 		void newTSItemSlot(ProfilerDDS::TimeSeries* pItem);
-        /// Feed new timeseries data via this slot. The data
-        /// vectors must be of the same length and non-zero; otherwise they
-        /// will be ignored. The vector lengths can change between calls,
-        /// and the plot will respond appropriately. If the plot is currently
-        /// configured for a time series display (I&Q, IvsQ or spectrum), the
-        /// new data will be displayed.
-        /// @param I A vector I values
-        /// @param Q A vector of Q values
-        /// @param sampleRateHz The sample rate of the I/Q data, in hz.
-        /// @param tuningFrequencyHz The current frequency of the receiver.
-        void timeSeriesSlot(
-                std::vector<double> I,
-                    std::vector<double> Q,
-                    double sampleRateHz,
-                    double tuningFreqHz);
-        /// Call when the plot type is changed. This function
+       /// Call when the plot type is changed. This function
         /// must determine which of the two families of
         /// plots, _tsPlotInfo, or _productPlotInfo, the
         /// previous and new plot types belong to.
@@ -118,7 +101,7 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         void pauseSlot(
                 bool p);
         /// Select the channel
-        /// @param c The channel (1-4)
+        /// @param c The channel (0-3)
         void channelSlot(
                 int c);
         /// Select the gate
@@ -270,7 +253,7 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         /// A list of available gates. This is set via the
         /// gateList slot.
         std::vector<int> _gates;
-        /// The choice of channels (1-4)
+        /// The choice of channels (0-3)
         int _channel;
         /// The selected gate, zero based.
         int _gateChoice;

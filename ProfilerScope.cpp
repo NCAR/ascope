@@ -34,11 +34,10 @@ ProfilerScope::ProfilerScope(
     QWidget(parent),
     _statsUpdateInterval(5),
             _timeSeriesPlot(TRUE), _config("NCAR", "ProfilerScope"),
-            _paused(false), _zeroMoment(0.0){
+            _paused(false), _zeroMoment(0.0),
+            _channel(0), _gateChoice(99){
     // Set up our form
     setupUi(this);
-
-    return;
 
     // Initialize fft calculations
     initFFT();
@@ -47,7 +46,7 @@ ProfilerScope::ProfilerScope(
     std::string title = _config.getString("title", "ProfilerScope");
     title += " ";
     //title += SvnVersion::revision();
-    parent->setWindowTitle(title.c_str());
+    //QApplication::activeWindow()->setWindowTitle(title.c_str());
 
     // initialize running statistics
     for (int i = 0; i < 3; i++) {
@@ -58,16 +57,16 @@ ProfilerScope::ProfilerScope(
     }
 
     // configure the channel selections
-    _channel = 1;
-    _chan1->setChecked(true);
+    _channel = 0;
+    _chan0->setChecked(true);
+    _chan1->setChecked(false);
     _chan2->setChecked(false);
     _chan3->setChecked(false);
-    _chan4->setChecked(false);
     QButtonGroup* channelButtonGroup = new QButtonGroup();
+    channelButtonGroup->addButton(_chan0, 0);
     channelButtonGroup->addButton(_chan1, 1);
     channelButtonGroup->addButton(_chan2, 2);
     channelButtonGroup->addButton(_chan3, 3);
-    channelButtonGroup->addButton(_chan4, 4);
 
     // connect the controls
     connect(_autoScale, SIGNAL(released()), this, SLOT(autoScaleSlot()));
@@ -91,7 +90,7 @@ ProfilerScope::ProfilerScope(
     // initialize the book keeping for the plots.
     // This also sets up the radio buttons
     // in the plot type tab widget
-    //initPlots();
+    initPlots();
 
     _gainKnob->setRange(-7, 7);
     _gainKnob->setTitle("Gain");
@@ -165,16 +164,6 @@ void ProfilerScope::initFFT() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::timeSeriesSlot(
-        std::vector<double> I, std::vector<double> Q, double sampleRateHz,
-        double tuningFreqHz) {
-    if (_paused)
-        return;
-
-    processTimeSeries(I, Q);
-}
-
-//////////////////////////////////////////////////////////////////////
 void ProfilerScope::saveImageSlot() {
     QString f = _config.getString("imageSaveDirectory", "c:/").c_str();
 
@@ -193,7 +182,7 @@ void ProfilerScope::saveImageSlot() {
     d.selectFile(f);
     if (d.exec()) {
         QStringList saveNames = d.selectedFiles();
-//        _scopePlot->saveImageToFile(saveNames[0].toStdString());
+        _scopePlot->saveImageToFile(saveNames[0].toStdString());
         f = d.directory().absolutePath();
         _config.setString("imageSaveDirectory", f.toStdString());
     }
@@ -250,23 +239,23 @@ void ProfilerScope::displayData() {
             pi->autoscale(false);
         }
         xlabel = std::string("Time");
-//        _scopePlot->TimeSeries(I, Q, yBottom, yTop, 1, xlabel, "I - Q");
+        _scopePlot->TimeSeries(I, Q, yBottom, yTop, 1, xlabel, "I - Q");
         break;
     case ScopePlot::IVSQ:
         if (pi->autoscale()) {
             autoScale(I, Q, displayType);
             pi->autoscale(false);
         }
-//        _scopePlot->IvsQ(I, Q, yBottom, yTop, 1, "I", "Q");
+        _scopePlot->IvsQ(I, Q, yBottom, yTop, 1, "I", "Q");
         break;
     case ScopePlot::SPECTRUM:
         if (pi->autoscale()) {
             autoScale(_spectrum, displayType);
             pi->autoscale(false);
         }
-//        _scopePlot->Spectrum(_spectrum, _specGraphCenter-_specGraphRange
-//                /2.0, _specGraphCenter+_specGraphRange/2.0, 1000000, false,
-//                "Frequency (Hz)", "Power (dB)");
+        _scopePlot->Spectrum(_spectrum, _specGraphCenter-_specGraphRange
+                /2.0, _specGraphCenter+_specGraphRange/2.0, 1000000, false,
+                "Frequency (Hz)", "Power (dB)");
         break;
     case ScopePlot::PRODUCT:
         // include just to quiet compiler warnings
@@ -466,25 +455,6 @@ QButtonGroup* ProfilerScope::addTSTypeTab(
 void ProfilerScope::timerEvent(
         QTimerEvent*) {
 
-    //int rate[3];
-    //for (int i = 0; i < 3; i++) {
-    //		rate[i] = (_pulseCount[i] - _prevPulseCount[i])/(double)_statsUpdateInterval;
-    //		_prevPulseCount[i] = _pulseCount[i];
-    //}
-    //	_chan0pulseCount->setNum(_pulseCount[0]/1000);
-    //	_chan0pulseRate->setNum(rate[0]);
-    //	_chan0errors->setNum(_errorCount[0]);
-    //	_chan1pulseCount->setNum(_pulseCount[1]/1000);
-    //	_chan1pulseRate->setNum(rate[1]);
-    //	_chan1errors->setNum(_errorCount[1]);
-    //	_chan2pulseCount->setNum(_pulseCount[2]/1000);
-    //	_chan2pulseRate->setNum(rate[2]);
-    //	_chan2errors->setNum(_errorCount[2]);
-
-    //	std::cout << "Packet errors = " <<
-    //	  _errorCount[0] << " " << _errorCount[1] << " " <<
-    //	  _errorCount[2] << std::endl;
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -605,8 +575,35 @@ void ProfilerScope::adjustGainOffset(
 //////////////////////////////////////////////////////////////////////
 void
 ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
+
+	int size = pItem->tsdata.length();
+	int gates = pItem->hskp.gates;
+	int channels = pItem->hskp.numChannels;
+	int tsLength = pItem->hskp.tsLength;
+
+	std::vector<double> I, Q;
+	I.resize(tsLength);
+	Q.resize(tsLength);
+
+	if (!_paused) {
+		int c = _channel;
+		int g = _gateChoice;
+		int index = c*gates*tsLength*2 + g*tsLength*2;;
+		for (int t = 0; t < tsLength; t++) {
+			I[t] = pItem->tsdata[index++];
+			Q[t] = pItem->tsdata[index++];
+		}
+	}
+
+	// return the DDS item
 	emit returnTSItem(pItem);
+
+	if (!_paused) {
+		processTimeSeries(I, Q);
+	}
+
 }
+
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::autoScaleSlot() {
     PlotInfo* pi;

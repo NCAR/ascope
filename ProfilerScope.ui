@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1262</width>
+    <width>1170</width>
     <height>907</height>
    </rect>
   </property>
@@ -20,7 +20,7 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="ScopePlot" name="_scopePlot" >
+    <widget class="ScopePlot" native="1" name="_scopePlot" >
      <property name="sizePolicy" >
       <sizepolicy>
        <hsizetype>3</hsizetype>
@@ -63,6 +63,14 @@
          </property>
          <item>
           <widget class="QGroupBox" name="groupBox_3" >
+           <property name="sizePolicy" >
+            <sizepolicy>
+             <hsizetype>1</hsizetype>
+             <vsizetype>1</vsizetype>
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title" >
             <string>Channel</string>
            </property>
@@ -74,7 +82,7 @@
              <number>6</number>
             </property>
             <item>
-             <widget class="QRadioButton" name="_chan1" >
+             <widget class="QRadioButton" name="_chan0" >
               <property name="toolTip" >
                <string>Select channel 1.</string>
               </property>
@@ -84,7 +92,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="_chan2" >
+             <widget class="QRadioButton" name="_chan1" >
               <property name="toolTip" >
                <string>Select channel 2.</string>
               </property>
@@ -94,7 +102,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="_chan3" >
+             <widget class="QRadioButton" name="_chan2" >
               <property name="toolTip" >
                <string>Select channel 3.</string>
               </property>
@@ -104,7 +112,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QRadioButton" name="_chan4" >
+             <widget class="QRadioButton" name="_chan3" >
               <property name="toolTip" >
                <string>Select channel 4.</string>
               </property>
@@ -120,6 +128,14 @@
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_5" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>1</hsizetype>
+           <vsizetype>5</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title" >
           <string>Product</string>
          </property>
@@ -185,6 +201,14 @@
          </property>
          <item>
           <widget class="QGroupBox" name="groupBox_2" >
+           <property name="sizePolicy" >
+            <sizepolicy>
+             <hsizetype>1</hsizetype>
+             <vsizetype>5</vsizetype>
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="title" >
             <string>Display Mode</string>
            </property>
@@ -197,6 +221,14 @@
             </property>
             <item row="3" column="1" >
              <widget class="QComboBox" name="_gateNumber" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>1</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="toolTip" >
                <string>Select the gate for the one gate display.</string>
               </property>
@@ -204,6 +236,14 @@
             </item>
             <item row="3" column="0" >
              <widget class="QLabel" name="label" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>1</hsizetype>
+                <vsizetype>5</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text" >
                <string>Gate Number</string>
               </property>
@@ -214,6 +254,14 @@
             </item>
             <item row="4" column="1" >
              <widget class="QComboBox" name="_blockSizeCombo" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>1</hsizetype>
+                <vsizetype>0</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="toolTip" >
                <string>Set the number of samples for one gate mode.</string>
               </property>
@@ -221,6 +269,14 @@
             </item>
             <item row="4" column="0" >
              <widget class="QLabel" name="label_2" >
+              <property name="sizePolicy" >
+               <sizepolicy>
+                <hsizetype>1</hsizetype>
+                <vsizetype>5</vsizetype>
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="text" >
                <string>Block size</string>
               </property>
@@ -242,6 +298,14 @@
            </property>
            <item>
             <widget class="QLabel" name="label_3" >
+             <property name="sizePolicy" >
+              <sizepolicy>
+               <hsizetype>1</hsizetype>
+               <vsizetype>5</vsizetype>
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text" >
               <string>Power (DB)</string>
              </property>
@@ -252,6 +316,14 @@
            </item>
            <item>
             <widget class="QLabel" name="_powerDB" >
+             <property name="sizePolicy" >
+              <sizepolicy>
+               <hsizetype>1</hsizetype>
+               <vsizetype>5</vsizetype>
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
              <property name="text" >
               <string>0</string>
              </property>
@@ -477,11 +549,11 @@
         </layout>
        </item>
        <item>
-        <widget class="Knob" name="_gainKnob" >
+        <widget class="Knob" native="1" name="_gainKnob" >
          <property name="sizePolicy" >
           <sizepolicy>
-           <hsizetype>3</hsizetype>
-           <vsizetype>3</vsizetype>
+           <hsizetype>1</hsizetype>
+           <vsizetype>1</vsizetype>
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -507,6 +579,14 @@
      </item>
      <item>
       <widget class="QGroupBox" name="groupBox" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>1</hsizetype>
+         <vsizetype>5</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="title" >
         <string>Pulse Statistics</string>
        </property>
