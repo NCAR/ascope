@@ -23,6 +23,8 @@ std::string _tsTopic;            ///< The published timeseries topic
 int _DCPSDebugLevel=0;           ///< the DCPSDebugLevel
 int _DCPSTransportDebugLevel=0;  ///< the DCPSTransportDebugLevel
 
+double _refreshHz;               ///< The scope refresh rate in Hz
+
 namespace po = boost::program_options;
 
 //////////////////////////////////////////////////////////////////////
@@ -32,7 +34,7 @@ namespace po = boost::program_options;
 void getConfigParams()
 {
 
-	QtConfig config("NCAR", "ProfilerScope");
+	QtConfig config("ProfilerScope", "ProfilerScope");
 
 	// set up the default configuration directory path
 	std::string ProfilerDir("/conf/");
@@ -55,7 +57,8 @@ void getConfigParams()
 	_DCPS         = config.getString("DDS/DCPSConfigFile", dcpsFile);
 	_tsTopic      = config.getString("DDS/TopicTS",        "PROFILERTS");
 	_DCPSInfoRepo = config.getString("DDS/DCPSInfoRepo",   dcpsInfoRepo);
-	std::cerr << "read DCPSInfoRepo = " << _DCPSInfoRepo << " from config" << std::endl;
+
+	_refreshHz    = config.getDouble("RefreshHz",  50.0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -72,12 +75,12 @@ void parseOptions(int argc,
 	po::options_description descripts("Options");
 	descripts.add_options()
 	("help", "describe options")
-	("ORB", po::value<std::string>(&_ORB), "ORB service configuration file (Corba ORBSvcConf arg)")
+    ("RefreshHz", po::value<double>(&_refreshHz), "Refresh rate (Hz)")
+    ("ORB", po::value<std::string>(&_ORB), "ORB service configuration file (Corba ORBSvcConf arg)")
 	("DCPS", po::value<std::string>(&_DCPS), "DCPS configuration file (OpenDDS DCPSConfigFile arg)")
 	("DCPSInfoRepo", po::value<std::string>(&_DCPSInfoRepo), "DCPSInfoRepo URL (OpenDDS DCPSInfoRepo arg)")
 	("DCPSDebugLevel", po::value<int>(&_DCPSDebugLevel), "DCPSDebugLevel ")
-	("DCPSTransportDebugLevel", po::value<int>(&_DCPSTransportDebugLevel),
-			"DCPSTransportDebugLevel ")
+	("DCPSTransportDebugLevel", po::value<int>(&_DCPSTransportDebugLevel), "DCPSTransportDebugLevel ")
 			;
 
 	po::variables_map vm;
@@ -121,7 +124,7 @@ main (int argc, char** argv) {
 	QApplication app(argc, argv);
 
 	// create the data source reader
-	QtTSReader reader(subscriber, _tsTopic, 1.0);
+	QtTSReader reader(subscriber, _tsTopic, _refreshHz);
 
  	// create the scope
 	ProfilerScope scope;
