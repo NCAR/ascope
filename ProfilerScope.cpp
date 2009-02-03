@@ -54,18 +54,9 @@ ProfilerScope::ProfilerScope(
         _lastPulseNum[i] = 0;
     }
 
-    // configure the channel selections
-    _channel = 0;
-    _chan0->setChecked(true);
-    _chan1->setChecked(false);
-    _chan2->setChecked(false);
-    _chan3->setChecked(false);
-    QButtonGroup* channelButtonGroup = new QButtonGroup();
-    channelButtonGroup->addButton(_chan0, 0);
-    channelButtonGroup->addButton(_chan1, 1);
-    channelButtonGroup->addButton(_chan2, 2);
-    channelButtonGroup->addButton(_chan3, 3);
-
+	// create a button group for the channels
+	_chanButtonGroup = new QButtonGroup;
+	
     // connect the controls
     connect(_autoScale, SIGNAL(released()), this, SLOT(autoScaleSlot()));
     connect(_gainKnob, SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
@@ -78,7 +69,7 @@ ProfilerScope::ProfilerScope(
     connect(_xGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableXgrid(bool)));
     connect(_yGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableYgrid(bool)));
     connect(_blockSizeCombo, SIGNAL(activated(int)), this, SLOT(blockSizeSlot(int)));
-    connect(channelButtonGroup, SIGNAL(buttonReleased(int)), this, SLOT(channelSlot(int)));
+    connect(_chanButtonGroup, SIGNAL(buttonReleased(int)), this, SLOT(channelSlot(int)));
 
     // set the checkbox selections
     _pauseButton->setChecked(false);
@@ -126,10 +117,20 @@ ProfilerScope::~ProfilerScope() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::initCombos(int tsLength, int gates) {
+void ProfilerScope::initCombos(int channels, int tsLength, int gates) {
 	// initialize the fft numerics
 	initFFT(tsLength);
 
+	// initialize the number of gates.
+	initGates(gates);
+	
+	// initialize the channels
+	initChans(channels);
+	
+	
+}
+//////////////////////////////////////////////////////////////////////
+void ProfilerScope::initGates(int gates) {
 	// populate the gate selection combo box
 	for (int g = 0; g < gates; g++) {
         QString l = QString("%1").arg(g);
@@ -137,6 +138,31 @@ void ProfilerScope::initCombos(int tsLength, int gates) {
 	}
 }
 
+//////////////////////////////////////////////////////////////////////
+void ProfilerScope::initChans(int channels) {
+
+    // create the channel seletion radio buttons.
+    
+	QVBoxLayout *vbox = new QVBoxLayout;
+	_chanBox->setLayout(vbox);
+	
+	for (int c = 0; c < channels; c++) {
+		// create the button and add to the layout
+		QString l = QString("Chan %1").arg(c);
+		QRadioButton* r = new QRadioButton(l);
+		vbox->addWidget(r);
+		// add it to the button group, with the channel 
+		// number as the id
+		_chanButtonGroup->addButton(r, c);
+		// select the first button
+		if (c == 0) {
+			r->setChecked(true);
+		    _channel = 0;
+		} else {
+			r->setChecked(false);
+		}
+	}
+}
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::initFFT(int tsLength) {
 
@@ -587,23 +613,24 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 
 	//int size = pItem->tsdata.length();
 	int gates = pItem->hskp.gates;
-	//int channels = pItem->hskp.numChannels;
+	int channels = pItem->hskp.numChannels;
 	int tsLength = pItem->hskp.tsLength;
 
 	if (!_combosInitialized) {
-		initCombos(tsLength, gates);
+		initCombos(channels, tsLength, gates);
 		_combosInitialized = true;
 	}
 
+	int blockSize = _blockSizeChoices[_blockSizeIndex];
 	std::vector<double> I, Q;
-	I.resize(tsLength);
-	Q.resize(tsLength);
+	I.resize(blockSize);
+	Q.resize(blockSize);
 
 	if (!_paused) {
 		int c = _channel;
 		int g = _gateChoice;
 		int index = c*gates*tsLength*2 + g*tsLength*2;;
-		for (int t = 0; t < tsLength; t++) {
+		for (int t = 0; t < blockSize; t++) {
 			I[t] = pItem->tsdata[index++];
 			Q[t] = pItem->tsdata[index++];
 		}

@@ -20,7 +20,7 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="ScopePlot" native="1" name="_scopePlot" >
+    <widget class="ScopePlot" name="_scopePlot" >
      <property name="sizePolicy" >
       <sizepolicy>
        <hsizetype>3</hsizetype>
@@ -54,77 +54,25 @@
         <number>6</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
+        <widget class="QGroupBox" name="_chanBox" >
+         <property name="sizePolicy" >
+          <sizepolicy>
+           <hsizetype>1</hsizetype>
+           <vsizetype>1</vsizetype>
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <property name="spacing" >
-          <number>6</number>
+         <property name="minimumSize" >
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
          </property>
-         <item>
-          <widget class="QGroupBox" name="groupBox_3" >
-           <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>1</hsizetype>
-             <vsizetype>1</vsizetype>
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="title" >
-            <string>Channel</string>
-           </property>
-           <layout class="QVBoxLayout" >
-            <property name="margin" >
-             <number>9</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
-            <item>
-             <widget class="QRadioButton" name="_chan0" >
-              <property name="toolTip" >
-               <string>Select channel 1.</string>
-              </property>
-              <property name="text" >
-               <string>1</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_chan1" >
-              <property name="toolTip" >
-               <string>Select channel 2.</string>
-              </property>
-              <property name="text" >
-               <string>2</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_chan2" >
-              <property name="toolTip" >
-               <string>Select channel 3.</string>
-              </property>
-              <property name="text" >
-               <string>3</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QRadioButton" name="_chan3" >
-              <property name="toolTip" >
-               <string>Select channel 4.</string>
-              </property>
-              <property name="text" >
-               <string>4</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-        </layout>
+         <property name="title" >
+          <string>Channel</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QGroupBox" name="groupBox_5" >
@@ -549,7 +497,7 @@
         </layout>
        </item>
        <item>
-        <widget class="Knob" native="1" name="_gainKnob" >
+        <widget class="Knob" name="_gainKnob" >
          <property name="sizePolicy" >
           <sizepolicy>
            <hsizetype>1</hsizetype>

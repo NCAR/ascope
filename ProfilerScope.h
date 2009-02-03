@@ -3,6 +3,8 @@
 
 #include <QWidget>
 #include <QPalette>
+#include <QButtonGroup>
+
 #include <qevent.h>
 #include <deque>
 #include <set>
@@ -123,6 +125,12 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         /// powers of two within this range. The block size
         /// combo selector is initialized.
         void initFFT(int tsLength);
+        /// Initialize the gate selection 
+        /// @param gates The number of gates
+        void initGates(int gates);
+        /// Initialize the channel selection
+        /// @param channels The number of channels
+		void initChans(int channels);
         /// Emit a signal announcing the desired gate mode,
         /// either along beam, or one gate. The channel select,
         /// gate choice and (for one gate mode) data block
@@ -158,10 +166,11 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
                 std::vector<double>& data1,
                     std::vector<double>& data2,
                     ScopePlot::PLOTTYPE displayType);
-        /// Initialize the combo box choices.
+        /// Initialize the combo box choices and FFTs.
+        /// @param channels The number of channels,
         /// @param tsLength The time series length
         /// @param gates The number of gates
-        void initCombos(int tsLength, int gates);
+        void initCombos(int channels, int tsLength, int gates);
         /// Adjust the _graphRange and _graphOffset values.
         /// @param min Desired scale minimum
         /// @param max Desired scale maximum
@@ -249,6 +258,8 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
                     std::vector<double>& Q);
         /// The configuration for ProfilerScope
         QtConfig _config;
+        /// The button group for channel selection
+        QButtonGroup* _chanButtonGroup;
         /// Palette for making the leds green
         QPalette _greenPalette;
         /// Platette for making the leds red
@@ -265,10 +276,7 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         /// Set false to cause initialization of blocksize and 
         /// gate choices when the first data is received.
         bool _combosInitialized;
-        
-        
-        
-        
+       
 };
 
 
