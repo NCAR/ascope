@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>EldoraScope</string>
+   <string>ProfilerScope</string>
   </property>
   <layout class="QHBoxLayout" >
    <property name="margin" >
@@ -355,7 +355,7 @@
             </sizepolicy>
            </property>
            <property name="toolTip" >
-            <string>Pause the display.</string>
+            <string>Enable time series windowing for the power spectrum.</string>
            </property>
            <property name="text" >
             <string>Windowing</string>
