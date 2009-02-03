@@ -116,12 +116,13 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         void windowSlot(bool);
 
     protected:
-        /// Initialize the fft calculations. The minimum and
-        /// maximum fft sizes are read from the configuration.
+        /// Initialize the fft calculations. The minimum
+        /// size is 8. The max size is time series length
+        /// to the largest power of 2.
         /// Fftw plans and data arrays are allocated for all
         /// powers of two within this range. The block size
         /// combo selector is initialized.
-        void initFFT();
+        void initFFT(int tsLength);
         /// Emit a signal announcing the desired gate mode,
         /// either along beam, or one gate. The channel select,
         /// gate choice and (for one gate mode) data block
@@ -157,6 +158,10 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
                 std::vector<double>& data1,
                     std::vector<double>& data2,
                     ScopePlot::PLOTTYPE displayType);
+        /// Initialize the combo box choices.
+        /// @param tsLength The time series length
+        /// @param gates The number of gates
+        void initCombos(int tsLength, int gates);
         /// Adjust the _graphRange and _graphOffset values.
         /// @param min Desired scale minimum
         /// @param max Desired scale maximum
@@ -250,16 +255,20 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         QPalette _redPalette;
         /// Set true if the plot graphics are paused
         bool _paused;
-        /// A list of available gates. This is set via the
-        /// gateList slot.
-        std::vector<int> _gates;
+        /// The signal power, computed directly from the I&Q
+        /// data, or from the power spectrum
+        double _zeroMoment;
         /// The choice of channels (0-3)
         int _channel;
         /// The selected gate, zero based.
         int _gateChoice;
-        /// The signal power, computed directly from the I&Q
-        /// data, or from the power spectrum
-        double _zeroMoment;
+        /// Set false to cause initialization of blocksize and 
+        /// gate choices when the first data is received.
+        bool _combosInitialized;
+        
+        
+        
+        
 };
 
 

@@ -35,12 +35,10 @@ ProfilerScope::ProfilerScope(
     _statsUpdateInterval(5),
             _timeSeriesPlot(TRUE), _config("NCAR", "ProfilerScope"),
             _paused(false), _zeroMoment(0.0),
-            _channel(0), _gateChoice(99){
+            _channel(0), _gateChoice(99),
+            _combosInitialized(false){
     // Set up our form
     setupUi(this);
-
-    // Initialize fft calculations
-    initFFT();
 
     // get our title from the coniguration
     std::string title = _config.getString("title", "ProfilerScope");
@@ -128,21 +126,32 @@ ProfilerScope::~ProfilerScope() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::initFFT() {
+void ProfilerScope::initCombos(int tsLength, int gates) {
+	// initialize the fft numerics
+	initFFT(tsLength);
+	
+	// populate the gate selection combo box
+	for (int g = 0; g < gates; g++) {
+        QString l = QString("%1").arg(g);
+		_gateNumber->addItem(l, QVariant(g));
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+void ProfilerScope::initFFT(int tsLength) {
 
     // configure the block/fft size selection
     /// @todo add logic to insure that smallest fft size is a power of two.
-    int fftSize = _config.getInt("FFTsmallest", 16);
-    int maxFftSize = _config.getInt("FFTlargest", 1024);
+    int fftSize = 8;
+    int maxFftSize = (int) pow(2, floor(log2(tsLength)));
     for (; fftSize <= maxFftSize; fftSize = fftSize*2) {
         _blockSizeChoices.push_back(fftSize);
         QString l = QString("%1").arg(fftSize);
         _blockSizeCombo->addItem(l, QVariant(fftSize));
     }
-    // select the middle choice for the block size
-    _blockSizeIndex = (_blockSizeChoices.size()-1)/2;
-    if (_blockSizeIndex < 0)
-        _blockSizeIndex = 0;
+    
+    // select the last choice for the block size
+    _blockSizeIndex = (_blockSizeChoices.size()-1);
     _blockSizeCombo->setCurrentIndex(_blockSizeIndex);
 
     //  set up fft for power calculations:
@@ -576,10 +585,15 @@ void ProfilerScope::adjustGainOffset(
 void
 ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 
-	int size = pItem->tsdata.length();
+	//int size = pItem->tsdata.length();
 	int gates = pItem->hskp.gates;
-	int channels = pItem->hskp.numChannels;
+	//int channels = pItem->hskp.numChannels;
 	int tsLength = pItem->hskp.tsLength;
+	
+	if (!_combosInitialized) {
+		initCombos(tsLength, gates);
+		_combosInitialized = true;
+	}
 
 	std::vector<double> I, Q;
 	I.resize(tsLength);
@@ -628,8 +642,8 @@ void ProfilerScope::channelSlot(
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::gateChoiceSlot(
         int index) {
-    _gateChoice = _gates[index];
-
+    _gateChoice = index;
+	std::cout << "new gate is " << _gateChoice << std::endl;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -637,6 +651,8 @@ void ProfilerScope::blockSizeSlot(
         int index) {
 
 	_blockSizeIndex = index;
+	
+	std::cout << "new block size is " << _blockSizeIndex << std::endl;
 
     // recalculate the hamming coefficients. _blockSizeIndex
 	// must be set correctly before calling this
