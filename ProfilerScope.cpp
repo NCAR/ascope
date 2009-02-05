@@ -56,7 +56,7 @@ ProfilerScope::ProfilerScope(
 
 	// create a button group for the channels
 	_chanButtonGroup = new QButtonGroup;
-	
+
     // connect the controls
     connect(_autoScale, SIGNAL(released()), this, SLOT(autoScaleSlot()));
     connect(_gainKnob, SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
@@ -123,11 +123,11 @@ void ProfilerScope::initCombos(int channels, int tsLength, int gates) {
 
 	// initialize the number of gates.
 	initGates(gates);
-	
+
 	// initialize the channels
 	initChans(channels);
-	
-	
+
+
 }
 //////////////////////////////////////////////////////////////////////
 void ProfilerScope::initGates(int gates) {
@@ -142,16 +142,16 @@ void ProfilerScope::initGates(int gates) {
 void ProfilerScope::initChans(int channels) {
 
     // create the channel seletion radio buttons.
-    
+
 	QVBoxLayout *vbox = new QVBoxLayout;
 	_chanBox->setLayout(vbox);
-	
+
 	for (int c = 0; c < channels; c++) {
 		// create the button and add to the layout
 		QString l = QString("Chan %1").arg(c);
 		QRadioButton* r = new QRadioButton(l);
 		vbox->addWidget(r);
-		// add it to the button group, with the channel 
+		// add it to the button group, with the channel
 		// number as the id
 		_chanButtonGroup->addButton(r, c);
 		// select the first button
