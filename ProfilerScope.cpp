@@ -613,36 +613,33 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 
 	//int size = pItem->tsdata.length();
 	int gates = pItem->hskp.gates;
-	int channels = pItem->hskp.numChannels;
+	int chanId = pItem->hskp.chanId;
 	int tsLength = pItem->hskp.tsLength;
-
+	
 	if (!_combosInitialized) {
-		initCombos(channels, tsLength, gates);
+		initCombos(4, tsLength, gates);
 		_combosInitialized = true;
 	}
 
-	int blockSize = _blockSizeChoices[_blockSizeIndex];
-	std::vector<double> I, Q;
-	I.resize(blockSize);
-	Q.resize(blockSize);
-
-	if (!_paused) {
-		int c = _channel;
-		int g = _gateChoice;
-		int index = c*gates*tsLength*2 + g*tsLength*2;;
+	if (chanId == _channel && !_paused) {
+		int blockSize = _blockSizeChoices[_blockSizeIndex];
+		std::vector<double> I, Q;
+		I.resize(blockSize);
+		Q.resize(blockSize);
+		int index = _gateChoice*tsLength*2;
+		
+		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
 			I[t] = pItem->tsdata[index++];
 			Q[t] = pItem->tsdata[index++];
 		}
+
+		// process the time series
+		processTimeSeries(I, Q);
 	}
 
 	// return the DDS item
 	emit returnTSItem(pItem);
-
-	if (!_paused) {
-		processTimeSeries(I, Q);
-	}
-
 }
 
 //////////////////////////////////////////////////////////////////////
