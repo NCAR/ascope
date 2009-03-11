@@ -615,7 +615,7 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 	int gates = pItem->hskp.gates;
 	int chanId = pItem->hskp.chanId;
 	int tsLength = pItem->hskp.tsLength;
-	
+
 	if (!_combosInitialized) {
 		initCombos(4, tsLength, gates);
 		_combosInitialized = true;
@@ -627,7 +627,7 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 		I.resize(blockSize);
 		Q.resize(blockSize);
 		int index = _gateChoice*tsLength*2;
-		
+
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
 			I[t] = pItem->tsdata[index++];
