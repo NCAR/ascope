@@ -626,12 +626,13 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 		std::vector<double> I, Q;
 		I.resize(blockSize);
 		Q.resize(blockSize);
-		int index = _gateChoice*tsLength*2;
+		int index = _gateChoice*2;
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-			I[t] = pItem->tsdata[index++];
-			Q[t] = pItem->tsdata[index++];
+			I[t] = pItem->tsdata[index];
+			Q[t] = pItem->tsdata[index+1];
+			index += 2*gates;
 		}
 
 		// process the time series
