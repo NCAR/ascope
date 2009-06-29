@@ -107,13 +107,13 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         void channelSlot(
                 int c);
         /// Select the gate
-        /// @param g The index from the combo box of the selected gate.
+        /// @param index The index from the combo box of the selected gate.
         void gateChoiceSlot(
                 int index);
         /// Select the block size
-        /// @param The block size. It must be a power of two.
+        /// @param size The block size. It must be a power of two.
         void blockSizeSlot(
-                int);
+                int size);
         /// Enable/disable windowing
         void windowSlot(bool);
 
@@ -152,16 +152,16 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         double _xyGraphCenter;
         double _specGraphRange;
         double _specGraphCenter;
-        /// set the _graphRange and _graphOffset based
-        /// on the single data series.
+        /// Autoscale based on a set of data.
         /// @param data The data series to be analyzed.
+        /// @param displayType The ScopePlot::PLOTTYPE of the display
         void autoScale(
                 std::vector<double>& data,
                 ScopePlot::PLOTTYPE displayType);
-        /// set the _graphRange and _graphOffset based
-        /// on the two data series.
+        /// Autoscale based on two sets of data.
         /// @param data1 The first data series to be analyzed.
         /// @param data2 The second data series to be analyzed.
+        /// @param displayType The ScopePlot::PLOTTYPE of the display
         void autoScale(
                 std::vector<double>& data1,
                     std::vector<double>& data2,
@@ -174,6 +174,7 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         /// Adjust the _graphRange and _graphOffset values.
         /// @param min Desired scale minimum
         /// @param max Desired scale maximum
+        /// @param displayType The ScopePlot::PLOTTYPE of the display
         void adjustGainOffset(
                 double min,
                     double max,
