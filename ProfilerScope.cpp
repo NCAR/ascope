@@ -20,6 +20,7 @@
 #include <QPalette>
 #include <QDateTime>
 #include <QFileDialog>
+#include <QProgressBar>
 #include <string>
 #include <algorithm>
 
@@ -87,6 +88,10 @@ ProfilerScope::ProfilerScope(
     // set the minor ticks
     _gainKnob->setScaleMaxMajor(5);
     _gainKnob->setScaleMaxMinor(5);
+    
+    // initialize the activity bar
+    _activityBar->setRange(0, 100);
+    _activityBar->setValue(0);
 
     _xyGraphRange = 1;
     _xyGraphCenter = 0.0;
@@ -641,6 +646,9 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 
 	// return the DDS item
 	emit returnTSItem(pItem);
+	
+	// bump the activity bar
+	_activityBar->setValue((_activityBar->value()+1) % 100);
 }
 
 //////////////////////////////////////////////////////////////////////

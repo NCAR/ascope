@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1170</width>
-    <height>907</height>
+    <width>1185</width>
+    <height>925</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -99,7 +99,7 @@
             <property name="sizePolicy" >
              <sizepolicy>
               <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+              <vsizetype>1</vsizetype>
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -1029,20 +1029,46 @@
        </layout>
       </widget>
      </item>
+     <item>
+      <widget class="QProgressBar" name="_activityBar" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>1</hsizetype>
+         <vsizetype>0</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="font" >
+        <font>
+         <pointsize>1</pointsize>
+        </font>
+       </property>
+       <property name="value" >
+        <number>24</number>
+       </property>
+       <property name="textVisible" >
+        <bool>false</bool>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ScopePlot</class>
-   <extends>QWidget</extends>
-   <header>ScopePlot.h</header>
-  </customwidget>
-  <customwidget>
    <class>Knob</class>
    <extends>QWidget</extends>
    <header>Knob.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ScopePlot</class>
+   <extends>QWidget</extends>
+   <header>ScopePlot.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
