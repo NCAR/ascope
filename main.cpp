@@ -104,7 +104,7 @@ main (int argc, char** argv) {
 	// parse the command line optins, substituting for config params.
 	parseOptions(argc, argv);
 
-	ArgvParams newargv("sniffer");
+	ArgvParams newargv("profilerscope");
 	newargv["-ORBSvcConf"] = _ORB;
 	newargv["-DCPSConfigFile"] = _DCPS;
 	newargv["-DCPSInfoRepo"] = _DCPSInfoRepo;
