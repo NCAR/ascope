@@ -635,8 +635,8 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-			I[t] = pItem->tsdata[index];
-			Q[t] = pItem->tsdata[index+1];
+			I[t] = pItem->data[index];
+			Q[t] = pItem->data[index+1];
 			index += 2*gates;
 		}
 
