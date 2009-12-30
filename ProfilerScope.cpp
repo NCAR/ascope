@@ -614,12 +614,12 @@ void ProfilerScope::adjustGainOffset(
 
 //////////////////////////////////////////////////////////////////////
 void
-ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
+ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeriesSequence* pItem) {
 
-	//int size = pItem->tsdata.length();
-	int gates = pItem->hskp.gates;
-	int chanId = pItem->hskp.chanId;
-	int tsLength = pItem->hskp.tsLength;
+	int chanId = pItem->chanId;
+	int tsLength = pItem->tsList.length();
+	// Get the gate count from the first sample
+    int gates = pItem->tsList[0].hskp.gates;
 
 	if (!_combosInitialized) {
 		initCombos(4, tsLength, gates);
@@ -631,13 +631,12 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeries* pItem) {
 		std::vector<double> I, Q;
 		I.resize(blockSize);
 		Q.resize(blockSize);
-		int index = _gateChoice*2;
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-			I[t] = pItem->data[index];
-			Q[t] = pItem->data[index+1];
-			index += 2*gates;
+            const ProfilerDDS::TimeSeries &ts = pItem->tsList[t];
+			I[t] = ts.data[_gateChoice * 2];
+			Q[t] = ts.data[_gateChoice * 2 + 1];
 		}
 
 		// process the time series
