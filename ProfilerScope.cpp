@@ -614,7 +614,7 @@ void ProfilerScope::adjustGainOffset(
 
 //////////////////////////////////////////////////////////////////////
 void
-ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeriesSequence* pItem) {
+ProfilerScope::newTSItemSlot(RadarDDS::TimeSeriesSequence* pItem) {
 
 	int chanId = pItem->chanId;
 	int tsLength = pItem->tsList.length();
@@ -634,7 +634,7 @@ ProfilerScope::newTSItemSlot(ProfilerDDS::TimeSeriesSequence* pItem) {
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-            const ProfilerDDS::TimeSeries &ts = pItem->tsList[t];
+            const RadarDDS::TimeSeries &ts = pItem->tsList[t];
 			I[t] = ts.data[_gateChoice * 2];
 			Q[t] = ts.data[_gateChoice * 2 + 1];
 		}

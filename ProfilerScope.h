@@ -64,12 +64,12 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
 
     signals:
 		/// emit this signal to return a DDS TS item.
-		void returnTSItem(ProfilerDDS::TimeSeriesSequence* pItem);
+		void returnTSItem(RadarDDS::TimeSeriesSequence* pItem);
 
     public slots:
 		/// Feed new timeseries data via this slot.
 		/// @param pItem The DDS Timeseries item containing the data
-		void newTSItemSlot(ProfilerDDS::TimeSeriesSequence* pItem);
+		void newTSItemSlot(RadarDDS::TimeSeriesSequence* pItem);
        /// Call when the plot type is changed. This function
         /// must determine which of the two families of
         /// plots, _tsPlotInfo, or _productPlotInfo, the
