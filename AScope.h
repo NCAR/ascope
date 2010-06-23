@@ -60,12 +60,13 @@ class AScope : public QWidget, private Ui::AScope {
         /// are passed by reference, hopefully eliminating an
         /// unnecessary copy.
         typedef struct {
-        	/// The IQ data, ordered as pulse x gate x I x Q
-        	short * data;
+        	/// I and Q for each beam is in a vector containing I,Q for each gate.
+        	/// IQbeams contains pointers to each IQ vector for all
+        	/// of the beams in the timeseries. The length of the timeseries
+        	/// can be found from IQbeams.size().
+        	std::vector<short*> IQbeams;
         	/// The number of gates
         	int gates;
-        	/// The number of pulses
-        	int tsLength;
         	/// The channel id
         	int chanId;
         	/// An opaque pointer that can be used to store

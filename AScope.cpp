@@ -617,8 +617,7 @@ void
 AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 
 	int chanId = pItem.chanId;
-	int tsLength = pItem.tsLength;
-	// Get the gate count from the first sample
+	int tsLength = pItem.IQbeams.size();
     int gates = pItem.gates;
 
 	if (!_combosInitialized) {
@@ -634,7 +633,7 @@ AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-            const short* ts = pItem.data + 2 * gates;
+            const short* ts = pItem.IQbeams[t];
 			I[t] = ts[_gateChoice * 2];
 			Q[t] = ts[_gateChoice * 2 + 1];
 		}
