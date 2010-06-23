@@ -17,15 +17,13 @@
 #include "QtConfig.h"
 
 // The designer generated header file.
-#include "ui_ProfilerScope.h"
+#include "ui_AScope.h"
 
 // PlotInfo knows the characteristics of a plot
 #include "PlotInfo.h"
 
-#include "TSReader.h"
-
 /**
- ProfilerScope provides a traditional real-time Ascope display of
+ AScope provides a traditional real-time Ascope display of
  eldora time series data and computed products. It is implmented
  with Qt, and uses the QtToolbox::ScopePlot as the primary display.
  I&Q, I versus Q, IQ power spectrum, and computed product displays
@@ -33,15 +31,15 @@
  for all gates, or in time for one gate. Users may select the
  fft block size and the gate to be displayed.
 
- ProfilerScope is simply a data consumer; it does not know
+ AScope is simply a data consumer; it does not know
  anything about the data provider. Signals and slots
  used to coordinate with other components.
 
  It is the responsibility of the data provider to feed data
- at a desired rate. ProfilerScope will attempt to render all data
+ at a desired rate. AScope will attempt to render all data
  delivered.
  **/
-class ProfilerScope : public QWidget, private Ui::ProfilerScope {
+class AScope : public QWidget, private Ui::AScope {
     Q_OBJECT
         /// types of plots available in the scope plot.
         enum SCOPE_PLOT_TYPES {
@@ -56,20 +54,46 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
             TS_IVSQ_PLOT,       ///<  time series I versus Q plot
             TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
         };
-
+        
      public:
-        ProfilerScope(
+        /// The timeseries type for importing data. The actual data
+        /// are passed by reference, hopefully eliminating an
+        /// unnecessary copy.
+        typedef struct {
+        	/// The IQ data, ordered as pulse x gate x I x Q
+        	short * data;
+        	/// The number of gates
+        	int gates;
+        	/// The number of pulses
+        	int tsLength;
+        	/// The channel id
+        	int chanId;
+        	/// An opaque pointer that can be used to store
+        	/// anything that the caller wants to track along 
+        	/// with the TimeSeries. This will be useful when 
+        	/// the TimeSeries is returned to the orginator, 
+        	/// if for example an associated object such as a
+        	/// DDS sample needs to be returned to DDS.
+        	void* handle;
+        } TimeSeries;
+
+        AScope(
                 QWidget* parent = 0);
-        virtual ~ProfilerScope();
+        virtual ~AScope();
 
     signals:
-		/// emit this signal to return a DDS TS item.
-		void returnTSItem(RadarDDS::TimeSeriesSequence* pItem);
+		/// emit this signal to alert the client that we
+		/// are finished with this item. AScope::TimeSeries
+		/// contains an opaque handle that the client can
+		/// use to keep track of this item between the 
+		/// triggering of newTSItemSlot() and the emmiting
+		/// of returnTSItem().
+		void returnTSItem(AScope::TimeSeries pItem);
 
     public slots:
 		/// Feed new timeseries data via this slot.
-		/// @param pItem The DDS Timeseries item containing the data
-		void newTSItemSlot(RadarDDS::TimeSeriesSequence* pItem);
+		/// @param pItem This contains some metadata and pointers to I/Q data
+		void newTSItemSlot(AScope::TimeSeries pItem);
        /// Call when the plot type is changed. This function
         /// must determine which of the two families of
         /// plots, _tsPlotInfo, or _productPlotInfo, the
@@ -257,7 +281,7 @@ class ProfilerScope : public QWidget, private Ui::ProfilerScope {
         double zeroMomentFromTimeSeries(
                 std::vector<double>& I,
                     std::vector<double>& Q);
-        /// The configuration for ProfilerScope
+        /// The configuration for AScope
         QtConfig _config;
         /// The button group for channel selection
         QButtonGroup* _chanButtonGroup;

@@ -5,7 +5,6 @@ qt4
 qtt_qtconfig
 qtt_scopeplot
 qtt_knob
-profilerdds
 doxygen
 fftw
 boost_program_options
@@ -16,25 +15,34 @@ env = Environment(tools = ['default'] + tools)
 qt4modules = ['QtCore','QtGui']
 env.EnableQt4Modules(qt4modules)
 
-# This will create ui_ProfilerScope.h
-env.Uic4(['ProfilerScope.ui',])
+# This will create ui_AScope.h
+env.Uic4(['AScope.ui',])
 
 sources = Split("""
-main.cpp
-ProfilerScope.cpp
+AScope.cpp
 PlotInfo.cpp
 """)
 
 headers = Split("""
-ProfilerScope.h
+AScope.h
 PlotInfo.h
 """)
 
 html = env.Apidocs(sources + headers, DOXYFILE_FILE = "Doxyfile")
 
-profilerscope = env.Program('profilerscope', sources)
+ascope = env.Library('ascope', sources)
 
-Default(profilerscope, html)
+Default(ascope, html)
+
+tooldir = env.Dir('.').srcnode().abspath    # this directory
+
+def ascope(env):
+    env.AppendUnique(CPPPATH = [tooldir])
+    env.AppendLibrary('ascope')
+    env.AppendDoxref('ascope')
+    env.Require(tools)
+
+Export('ascope')
 
 
 

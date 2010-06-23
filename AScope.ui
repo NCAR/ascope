@@ -1,6 +1,6 @@
 <ui version="4.0" >
- <class>ProfilerScope</class>
- <widget class="QWidget" name="ProfilerScope" >
+ <class>AScope</class>
+ <widget class="QWidget" name="AScope" >
   <property name="geometry" >
    <rect>
     <x>0</x>

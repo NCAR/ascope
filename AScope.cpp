@@ -1,4 +1,4 @@
-#include "ProfilerScope.h"
+#include "AScope.h"
 #include "ScopePlot.h"
 #include "Knob.h"
 //#include "SvnVersion.h"
@@ -30,11 +30,11 @@
 #include <qwt_wheel.h>
 
 //////////////////////////////////////////////////////////////////////
-ProfilerScope::ProfilerScope(
+AScope::AScope(
         QWidget* parent) :
     QWidget(parent),
     _statsUpdateInterval(5),
-            _timeSeriesPlot(TRUE), _config("NCAR", "ProfilerScope"),
+            _timeSeriesPlot(TRUE), _config("NCAR", "AScope"),
             _paused(false), _zeroMoment(0.0),
             _channel(0), _gateChoice(0),
             _combosInitialized(false){
@@ -42,7 +42,7 @@ ProfilerScope::ProfilerScope(
     setupUi(this);
 
     // get our title from the coniguration
-    std::string title = _config.getString("title", "ProfilerScope");
+    std::string title = _config.getString("title", "AScope");
     title += " ";
     //title += SvnVersion::revision();
     //QApplication::activeWindow()->setWindowTitle(title.c_str());
@@ -118,11 +118,11 @@ ProfilerScope::ProfilerScope(
 
 }
 //////////////////////////////////////////////////////////////////////
-ProfilerScope::~ProfilerScope() {
+AScope::~AScope() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::initCombos(int channels, int tsLength, int gates) {
+void AScope::initCombos(int channels, int tsLength, int gates) {
 	// initialize the fft numerics
 	initFFT(tsLength);
 
@@ -135,7 +135,7 @@ void ProfilerScope::initCombos(int channels, int tsLength, int gates) {
 
 }
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::initGates(int gates) {
+void AScope::initGates(int gates) {
 	// populate the gate selection combo box
 	for (int g = 0; g < gates; g++) {
         QString l = QString("%1").arg(g);
@@ -144,7 +144,7 @@ void ProfilerScope::initGates(int gates) {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::initChans(int channels) {
+void AScope::initChans(int channels) {
 
     // create the channel seletion radio buttons.
 
@@ -169,7 +169,7 @@ void ProfilerScope::initChans(int channels) {
 	}
 }
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::initFFT(int tsLength) {
+void AScope::initFFT(int tsLength) {
 
     // configure the block/fft size selection
     /// @todo add logic to insure that smallest fft size is a power of two.
@@ -204,10 +204,10 @@ void ProfilerScope::initFFT(int tsLength) {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::saveImageSlot() {
+void AScope::saveImageSlot() {
     QString f = _config.getString("imageSaveDirectory", "c:/").c_str();
 
-    QFileDialog d( this, tr("Save ProfilerScope Image"), f,
+    QFileDialog d( this, tr("Save AScope Image"), f,
             tr("PNG files (*.png);;All files (*.*)"));
     d.setFileMode(QFileDialog::AnyFile);
     d.setViewMode(QFileDialog::Detail);
@@ -216,7 +216,7 @@ void ProfilerScope::saveImageSlot() {
     d.setDefaultSuffix("png");
     d.setDirectory(f);
 
-    f = "ProfilerScope-";
+    f = "AScope-";
     f += QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss");
     f += ".png";
     d.selectFile(f);
@@ -228,7 +228,7 @@ void ProfilerScope::saveImageSlot() {
     }
 }
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::processTimeSeries(
+void AScope::processTimeSeries(
         std::vector<double>& Idata, std::vector<double>& Qdata) {
     if (!_timeSeriesPlot)
         return;
@@ -259,7 +259,7 @@ void ProfilerScope::processTimeSeries(
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::displayData() {
+void AScope::displayData() {
     double yBottom = _xyGraphCenter - _xyGraphRange;
     double yTop = _xyGraphCenter + _xyGraphRange;
 
@@ -304,7 +304,7 @@ void ProfilerScope::displayData() {
 }
 
 //////////////////////////////////////////////////////////////////////
-double ProfilerScope::powerSpectrum(
+double AScope::powerSpectrum(
         std::vector<double>& Idata, std::vector<double>& Qdata) {
 
     int blockSize = _blockSizeChoices[_blockSizeIndex];
@@ -368,7 +368,7 @@ double ProfilerScope::powerSpectrum(
 }
 
 ////////////////////////////////////////////////////////////////////
-void ProfilerScope::plotTypeSlot(
+void AScope::plotTypeSlot(
         int plotType) {
 
     // find out the index of the current page
@@ -384,7 +384,7 @@ void ProfilerScope::plotTypeSlot(
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::tabChangeSlot(
+void AScope::tabChangeSlot(
         QWidget* w) {
     // find out the index of the current page
     int pageNum = _typeTab->currentIndex();
@@ -399,7 +399,7 @@ void ProfilerScope::tabChangeSlot(
 }
 
 ////////////////////////////////////////////////////////////////////
-void ProfilerScope::plotTypeChange(
+void AScope::plotTypeChange(
         PlotInfo* pi, TS_PLOT_TYPES newPlotType) {
 
     // save the gain and offset of the current plot type
@@ -420,7 +420,7 @@ void ProfilerScope::plotTypeChange(
 }
 
 ////////////////////////////////////////////////////////////////////
-void ProfilerScope::initPlots() {
+void AScope::initPlots() {
 
     _pulsePlots.insert(TS_TIMESERIES_PLOT);
     _pulsePlots.insert(TS_IVSQ_PLOT);
@@ -450,7 +450,7 @@ void ProfilerScope::initPlots() {
 }
 
 //////////////////////////////////////////////////////////////////////
-QButtonGroup* ProfilerScope::addTSTypeTab(
+QButtonGroup* AScope::addTSTypeTab(
         std::string tabName, std::set<TS_PLOT_TYPES> types) {
     // The page that will be added to the tab widget
     QWidget* pPage = new QWidget;
@@ -492,13 +492,13 @@ QButtonGroup* ProfilerScope::addTSTypeTab(
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::timerEvent(
+void AScope::timerEvent(
         QTimerEvent*) {
 
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::gainChangeSlot(
+void AScope::gainChangeSlot(
         double gain) {
 
     // keep a local copy of the gain knob value
@@ -513,7 +513,7 @@ void ProfilerScope::gainChangeSlot(
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::upSlot() {
+void AScope::upSlot() {
     bool spectrum = false;
 
     if (_timeSeriesPlot) {
@@ -532,7 +532,7 @@ void ProfilerScope::upSlot() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::dnSlot() {
+void AScope::dnSlot() {
 
     bool spectrum = false;
 
@@ -553,7 +553,7 @@ void ProfilerScope::dnSlot() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::autoScale(
+void AScope::autoScale(
         std::vector<double>& data, ScopePlot::PLOTTYPE displayType) {
     if (data.size() == 0)
         return;
@@ -567,7 +567,7 @@ void ProfilerScope::autoScale(
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::autoScale(
+void AScope::autoScale(
         std::vector<double>& data1, std::vector<double>& data2,
         ScopePlot::PLOTTYPE displayType) {
     if (data1.size() == 0 || data2.size() == 0)
@@ -588,7 +588,7 @@ void ProfilerScope::autoScale(
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::adjustGainOffset(
+void AScope::adjustGainOffset(
         double min, double max, ScopePlot::PLOTTYPE displayType) {
     if (displayType == ScopePlot::SPECTRUM) {
         // currently in spectrum plot mode
@@ -614,12 +614,12 @@ void ProfilerScope::adjustGainOffset(
 
 //////////////////////////////////////////////////////////////////////
 void
-ProfilerScope::newTSItemSlot(RadarDDS::TimeSeriesSequence* pItem) {
+AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 
-	int chanId = pItem->chanId;
-	int tsLength = pItem->tsList.length();
+	int chanId = pItem.chanId;
+	int tsLength = pItem.tsLength;
 	// Get the gate count from the first sample
-    int gates = pItem->tsList[0].hskp.gates;
+    int gates = pItem.gates;
 
 	if (!_combosInitialized) {
 		initCombos(4, tsLength, gates);
@@ -634,9 +634,9 @@ ProfilerScope::newTSItemSlot(RadarDDS::TimeSeriesSequence* pItem) {
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-            const RadarDDS::TimeSeries &ts = pItem->tsList[t];
-			I[t] = ts.data[_gateChoice * 2];
-			Q[t] = ts.data[_gateChoice * 2 + 1];
+            const short* ts = pItem.data + 2 * gates;
+			I[t] = ts[_gateChoice * 2];
+			Q[t] = ts[_gateChoice * 2 + 1];
 		}
 
 		// process the time series
@@ -651,7 +651,7 @@ ProfilerScope::newTSItemSlot(RadarDDS::TimeSeriesSequence* pItem) {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::autoScaleSlot() {
+void AScope::autoScaleSlot() {
     PlotInfo* pi;
 
     pi = &_tsPlotInfo[_tsPlotType];
@@ -660,25 +660,25 @@ void ProfilerScope::autoScaleSlot() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::pauseSlot(
+void AScope::pauseSlot(
         bool p) {
     _paused = p;
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::channelSlot(
+void AScope::channelSlot(
         int c) {
     _channel = c;
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::gateChoiceSlot(
+void AScope::gateChoiceSlot(
         int index) {
     _gateChoice = index;
 }
 
 //////////////////////////////////////////////////////////////////////
-void ProfilerScope::blockSizeSlot(
+void AScope::blockSizeSlot(
         int index) {
 
 	_blockSizeIndex = index;
@@ -691,7 +691,7 @@ void ProfilerScope::blockSizeSlot(
 
 ////////////////////////////////////////////////////////////////////////
 
-double ProfilerScope::zeroMomentFromTimeSeries(
+double AScope::zeroMomentFromTimeSeries(
         std::vector<double>& I, std::vector<double>& Q) {
     double p = 0;
     int n = I.size();
@@ -707,7 +707,7 @@ double ProfilerScope::zeroMomentFromTimeSeries(
 
 ////////////////////////////////////////////////////////////////////////
 void
-ProfilerScope::doHamming() {
+AScope::doHamming() {
 
   int blockSize = _blockSizeChoices[_blockSizeIndex];
 
@@ -719,7 +719,7 @@ ProfilerScope::doHamming() {
 ////////////////////////////////////////////////////////////////////////
 
 void
-ProfilerScope::hammingSetup() {
+AScope::hammingSetup() {
 
    int blockSize = _blockSizeChoices[_blockSizeIndex];
 
@@ -734,6 +734,6 @@ ProfilerScope::hammingSetup() {
 ////////////////////////////////////////////////////////////////////////
 
 void
-ProfilerScope::windowSlot(bool flag) {
+AScope::windowSlot(bool flag) {
 	_doHamming = flag;
 }
