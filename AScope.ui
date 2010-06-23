@@ -10,7 +10,7 @@
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>ProfilerScope</string>
+   <string>AScope</string>
   </property>
   <layout class="QHBoxLayout" >
    <property name="margin" >
