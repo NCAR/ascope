@@ -64,7 +64,7 @@ class AScope : public QWidget, private Ui::AScope {
         	/// IQbeams contains pointers to each IQ vector for all
         	/// of the beams in the timeseries. The length of the timeseries
         	/// can be found from IQbeams.size().
-        	std::vector<short*> IQbeams;
+        	std::vector<float*> IQbeams;
         	/// The number of gates
         	int gates;
         	/// The channel id

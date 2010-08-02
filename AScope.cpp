@@ -633,7 +633,7 @@ AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 
 		// extract the time series from the DDS sample
 		for (int t = 0; t < blockSize; t++) {
-            const short* ts = pItem.IQbeams[t];
+            const float* ts = pItem.IQbeams[t];
 			I[t] = ts[_gateChoice * 2];
 			Q[t] = ts[_gateChoice * 2 + 1];
 		}
