@@ -1,6 +1,9 @@
 #ifndef PROFILERSCOPE_H_
 #define PROFILERSCOPE_H_
 
+#include <iostream>
+#include <cstdlib>
+
 #include <QWidget>
 #include <QPalette>
 #include <QButtonGroup>
@@ -59,24 +62,77 @@ class AScope : public QWidget, private Ui::AScope {
         /// The timeseries type for importing data. The actual data
         /// are passed by reference, hopefully eliminating an
         /// unnecessary copy.
-        typedef struct {
-        	/// I and Q for each beam is in a vector containing I,Q for each gate.
-        	/// IQbeams contains pointers to each IQ vector for all
-        	/// of the beams in the timeseries. The length of the timeseries
-        	/// can be found from IQbeams.size().
-        	std::vector<float*> IQbeams;
-        	/// The number of gates
-        	int gates;
-        	/// The channel id
-        	int chanId;
-        	/// An opaque pointer that can be used to store
-        	/// anything that the caller wants to track along 
-        	/// with the TimeSeries. This will be useful when 
-        	/// the TimeSeries is returned to the orginator, 
-        	/// if for example an associated object such as a
-        	/// DDS sample needs to be returned to DDS.
-        	void* handle;
-        } TimeSeries;
+        class TimeSeries {
+        public:
+            // Data types we deal with. 
+            enum TsDataTypeEnum { VOIDDATA, FLOATDATA, SHORTDATA };
+            
+            /*
+             * The default constructor sets dataType to VOIDDATA, and this 
+             * value must be set to the correct type by the user before trying 
+             * to extract data using the i() and q() methods.
+             */
+            TimeSeries() : dataType(VOIDDATA) {}
+            TimeSeries(TsDataTypeEnum type) : dataType(type) {}
+            
+            /// I and Q for each beam is in a vector containing I,Q for each gate.
+            /// IQbeams contains pointers to each IQ vector for all
+            /// of the beams in the timeseries. The length of the timeseries
+            /// can be found from IQbeams.size(). The data types pointed to
+            /// are defined by our dataType.
+            std::vector<void*> IQbeams;
+            /// Data type of the pointers in IQbeams
+            TsDataTypeEnum dataType;
+            /// The number of gates
+            int gates;
+            /// The channel id
+            int chanId;
+            /// An opaque pointer that can be used to store
+            /// anything that the caller wants to track along 
+            /// with the TimeSeries. This will be useful when 
+            /// the TimeSeries is returned to the orginator, 
+            /// if for example an associated object such as a
+            /// DDS sample needs to be returned to DDS.
+            void* handle;
+            
+            // Get I and Q values by pulse number and gate.
+            double i(int pulse, int gate) const { 
+                switch (dataType) {
+                    case FLOATDATA:
+                        return(static_cast<float*>(IQbeams[pulse])[2 * gate]);
+                    case SHORTDATA:
+                        return(static_cast<short*>(IQbeams[pulse])[2 * gate]);
+                    default:
+                        std::cerr << "Attempt to extract data from " <<
+                            "AScope::TimeSeries with data type unset!" << std::endl;
+                        abort();
+                }
+            }
+            
+            double q(int pulse, int gate) const {
+                switch (dataType) {
+                  case FLOATDATA:
+                    return(static_cast<float*>(IQbeams[pulse])[2 * gate + 1]);
+                  case SHORTDATA:
+                    return(static_cast<short*>(IQbeams[pulse])[2 * gate + 1]);
+                  default:
+                    std::cerr << "Attempt to extract data from " <<
+                    "AScope::TimeSeries with data type unset!" << std::endl;
+                    abort();
+                }
+            }
+        };
+        
+        /// TimeSeries subclasses for short* and float* data pointers
+        class ShortTimeSeries : public TimeSeries {
+        public:
+            ShortTimeSeries() : TimeSeries(TimeSeries::SHORTDATA) {}
+        };
+        
+        class FloatTimeSeries : public TimeSeries {
+        public:
+            FloatTimeSeries() : TimeSeries(TimeSeries::FLOATDATA) {}
+        };
 
         AScope(
                 QWidget* parent = 0);
@@ -87,7 +143,7 @@ class AScope : public QWidget, private Ui::AScope {
 		/// are finished with this item. AScope::TimeSeries
 		/// contains an opaque handle that the client can
 		/// use to keep track of this item between the 
-		/// triggering of newTSItemSlot() and the emmiting
+		/// triggering of newTSItemSlot() and the emitting
 		/// of returnTSItem().
 		void returnTSItem(AScope::TimeSeries pItem);
 

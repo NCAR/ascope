@@ -631,12 +631,11 @@ AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 		I.resize(blockSize);
 		Q.resize(blockSize);
 
-		// extract the time series from the DDS sample
-		for (int t = 0; t < blockSize; t++) {
-            const float* ts = pItem.IQbeams[t];
-			I[t] = ts[_gateChoice * 2];
-			Q[t] = ts[_gateChoice * 2 + 1];
-		}
+        // extract the time series from the DDS sample
+        for (int t = 0; t < blockSize; t++) {
+            I[t] = pItem.i(t, _gateChoice);
+            Q[t] = pItem.q(t, _gateChoice);
+        }
 
 		// process the time series
 		processTimeSeries(I, Q);
