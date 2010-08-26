@@ -17,7 +17,6 @@
 // Components from the QtToolbox
 #include "ScopePlot.h"
 #include "Knob.h"
-#include "QtConfig.h"
 
 // The designer generated header file.
 #include "ui_AScope.h"
@@ -144,8 +143,12 @@ class AScope : public QWidget, private Ui::AScope {
         /// Constructor
         /// @param refreshRateHz The rate at which we want the display to
         /// update. Data will be (nominally) collected at this rate.
+        /// @param saveDir The default directory to save images in
         /// @param parent The parent widget.
-        AScope(double refreshRateHz = 25, QWidget* parent = 0);
+        AScope(
+        		double refreshRateHz = 25,
+        		std::string saveDir = ".",
+        		QWidget* parent = 0);
         /// Destructor
         virtual ~AScope();
 
@@ -311,7 +314,7 @@ class AScope : public QWidget, private Ui::AScope {
         /// Holds power spectrum values for display.
         std::vector<double> _spectrum;
         // how often to update the display
-        int _refreshIntervalHz;
+        double _refreshIntervalHz;
         /// Set true when a plot is chosen which shows results
         /// from IQ data. If a plot of products is chosen,
         /// it is false.
@@ -333,10 +336,10 @@ class AScope : public QWidget, private Ui::AScope {
         fftw_complex* _fftwData;
         //	power correction factor applied to (uncorrected) powerSpectrum() output
         double _powerCorrection;
+        /// The current block size
+        unsigned int _blockSize;
         /// Set true if the Hamming window should be applied
         bool _doHamming;
-        /// The configuration for AScope
-        QtConfig _config;
         /// The button group for channel selection
         QButtonGroup* _chanButtonGroup;
         /// Palette for making the leds green
@@ -376,10 +379,10 @@ class AScope : public QWidget, private Ui::AScope {
     	unsigned int _nextIQ;
     	/// The number of gates. Initially zero, it is diagnosed from the data stream
     	int _gates;
-        /// The current block size
-        unsigned int _blockSize;
         /// set true when we want to start capturing the next incoming data
         bool _capture;
+        /// The directory where images are saved.
+        std::string _saveDir;
 };
 
 

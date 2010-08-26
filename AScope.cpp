@@ -29,13 +29,12 @@
 #include <qwt_wheel.h>
 
 //////////////////////////////////////////////////////////////////////
-AScope::AScope(double refreshRateHz, QWidget* parent ) :
+AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
     QWidget(parent),
-    _fftwData(0),
-    _blockSize(0),
     _refreshIntervalHz(refreshRateHz),
     _IQplot(TRUE),
-    _config("NCAR", "AScope"),
+    _fftwData(0),
+    _blockSize(0),
     _paused(false),
     _zeroMoment(0.0),
     _channel(0),
@@ -44,7 +43,8 @@ AScope::AScope(double refreshRateHz, QWidget* parent ) :
     _alongBeam(false),
     _nextIQ(0),
     _gates(0),
-    _capture(true)
+    _capture(true),
+    _saveDir(saveDir)
 {
     // Set up our form
     setupUi(this);
@@ -53,12 +53,6 @@ AScope::AScope(double refreshRateHz, QWidget* parent ) :
     if (refreshRateHz < 1.0) {
     	refreshRateHz = 1.0;
     }
-
-    // get our title from the coniguration
-    std::string title = _config.getString("title", "AScope");
-    title += " ";
-    //title += SvnVersion::revision();
-    //QApplication::activeWindow()->setWindowTitle(title.c_str());
 
     // initialize running statistics
     for (int i = 0; i < 3; i++) {
@@ -126,7 +120,12 @@ AScope::AScope(double refreshRateHz, QWidget* parent ) :
 
 
     // start the statistics timer
-    startTimer(1000/_refreshIntervalHz);
+    int interval = (int)(1000/_refreshIntervalHz);
+    if (interval < 1) {
+    	// require at least 1 ms pauses.
+    	interval = 1;
+    }
+    startTimer(interval);
 
     // let the data sources get themselves ready
     sleep(1);
@@ -226,7 +225,7 @@ void AScope::initFFT(int size) {
 
 //////////////////////////////////////////////////////////////////////
 void AScope::saveImageSlot() {
-    QString f = _config.getString("imageSaveDirectory", "c:/").c_str();
+    QString f = _saveDir.c_str();
 
     QFileDialog d( this, tr("Save AScope Image"), f,
             tr("PNG files (*.png);;All files (*.*)"));
@@ -245,7 +244,7 @@ void AScope::saveImageSlot() {
         QStringList saveNames = d.selectedFiles();
         _scopePlot->saveImageToFile(saveNames[0].toStdString());
         f = d.directory().absolutePath();
-        _config.setString("imageSaveDirectory", f.toStdString());
+        _saveDir = f.toStdString();
     }
 }
 //////////////////////////////////////////////////////////////////////
@@ -342,13 +341,13 @@ double AScope::powerSpectrum(
     _spectrum.resize(_blockSize);
 
     unsigned int n = (Idata.size() <_blockSize) ? Idata.size(): _blockSize;
-    for (int j = 0; j < n; j++) {
+    for (unsigned int j = 0; j < n; j++) {
         // transfer the data to the fftw input space
         _fftwData[j][0] = Idata[j];
         _fftwData[j][1] = Qdata[j];
     }
     // zero pad if necessary
-    for (int j = n; j < _blockSize; j++) {
+    for (unsigned int j = n; j < _blockSize; j++) {
         _fftwData[j][0] = 0;
         _fftwData[j][1] = 0;
     }
@@ -364,7 +363,7 @@ double AScope::powerSpectrum(
     double zeroMoment = 0.0;
 
     // reorder and copy the results into _spectrum
-    for (int i = 0; i < _blockSize/2; i++) {
+    for (unsigned int i = 0; i < _blockSize/2; i++) {
         double pow =
            _fftwData[i][0] * _fftwData[i][0] +
            _fftwData[i][1] * _fftwData[i][1];
@@ -376,7 +375,7 @@ double AScope::powerSpectrum(
         _spectrum[i+_blockSize/2] = pow;
     }
 
-    for (int i = _blockSize/2; i < _blockSize; i++) {
+    for (unsigned int i = _blockSize/2; i < _blockSize; i++) {
         double pow =
            _fftwData[i][0] * _fftwData[i][0] +
            _fftwData[i][1] * _fftwData[i][1];
@@ -720,7 +719,7 @@ void AScope::gateChoiceSlot(int index) {
 
 //////////////////////////////////////////////////////////////////////
 void AScope::blockSizeSlot(int index) {
-    int size = _blockSizeChoices[index];
+    unsigned int size = _blockSizeChoices[index];
 
 	// Reconfigure fftw if the size has changed
 	if (size != _blockSize) {
@@ -757,7 +756,7 @@ double AScope::zeroMomentFromTimeSeries(
 void
 AScope::doHamming() {
 
-  for (int i = 0; i < _blockSize; i++) {
+  for (unsigned int i = 0; i < _blockSize; i++) {
     _fftwData[i][0] *= _hammingCoefs[i];
     _fftwData[i][1] *= _hammingCoefs[i];
   }

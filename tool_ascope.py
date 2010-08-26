@@ -2,12 +2,10 @@
 
 tools = Split("""
 qt4
-qtt_qtconfig
 qtt_scopeplot
 qtt_knob
 doxygen
 fftw
-boost_program_options
 """)
 
 env = Environment(tools = ['default'] + tools)
