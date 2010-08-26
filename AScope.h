@@ -27,10 +27,10 @@
 
 /**
  AScope provides a traditional real-time Ascope display of
- eldora time series data and computed products. It is implmented
+ eldora time series data and computed products. It is implemented
  with Qt, and uses the QtToolbox::ScopePlot as the primary display.
  I&Q, I versus Q, IQ power spectrum, and computed product displays
- are user selectable. The data can be displayed either along the beam
+ are available. The data can be displayed either along the beam
  for all gates, or in time for one gate. Users may select the
  fft block size and the gate to be displayed.
 
@@ -41,10 +41,41 @@
  It is the responsibility of the data provider to feed data
  at a desired rate. AScope will attempt to render all data
  delivered.
+
+ There are two data areas, _I/_Q and _fftwData, that are dynamically
+ resized depending upon the operational mode of the scope.
+
+ _I and _Q contain the I/Q values that are being analyzed. They are
+ filled as data is delivered to newTSItemSlot. They will be either
+ be the same as the selected block size, if operating in fixed gate
+ mode, or the number of gates if operating along beam mode.
+
+ _fftwData is sized to the currently selected block size. Thus this will
+ match _I/_Q sizes when operating in fixed gate mode. When in along beam mode,
+ this probably not match the number of gates. The _fftwData will be zero padded
+ if it is larger than _I/_Q size. If smaller, it will just be filled with
+ the leading data from _I/_Q.
+
+ Thus, _I/Q gets resized when the block size is changed, if not operating
+ in along beam mode. It gets resized to the number of gates,
+ when switching into along beam mode. It gets resized to the block size
+ when leaving along beam mode.
+
+ Likewise, _fftwData gets resized when the block size changes. A new
+ fftwPlan gets created at the same time.
+
+ The processing of incoming data will be handled differently depending
+ upon the type of plot that is currently selected. For instance, if
+ a time series or I vs Q  plot by gate is chosen, I and Q are collected
+ along the specified gate and displayed. If a power spectrum plot is
+ chosen, the I and Q data are collected and then a power spectrum is
+ computed. And so on. This work is done in newTSItemSlot(), and then
+ the collected data are sent on to proper display method.
  **/
 class AScope : public QWidget, private Ui::AScope {
     Q_OBJECT
-        /// types of plots available in the scope plot.
+        /// types of all plots for displaying both
+        /// time series and product data.
         enum SCOPE_PLOT_TYPES {
             SCOPE_PLOT_TIMESERIES,
             SCOPE_PLOT_IVSQ,
@@ -72,9 +103,12 @@ class AScope : public QWidget, private Ui::AScope {
              * value must be set to the correct type by the user before trying 
              * to extract data using the i() and q() methods.
              */
-            TimeSeries() : dataType(VOIDDATA) {}
-            TimeSeries(TsDataTypeEnum type) : dataType(type) {}
-            
+            TimeSeries();
+            TimeSeries(TsDataTypeEnum type);
+            // Get I values by pulse number and gate.
+            inline double i(int pulse, int gate) const;
+            // Get I values by pulse number and gate.
+            inline double q(int pulse, int gate) const;
             /// I and Q for each beam is in a vector containing I,Q for each gate.
             /// IQbeams contains pointers to each IQ vector for all
             /// of the beams in the timeseries. The length of the timeseries
@@ -90,37 +124,10 @@ class AScope : public QWidget, private Ui::AScope {
             /// An opaque pointer that can be used to store
             /// anything that the caller wants to track along 
             /// with the TimeSeries. This will be useful when 
-            /// the TimeSeries is returned to the orginator, 
-            /// if for example an associated object such as a
+            /// the TimeSeries is returned to the owner,
+            /// if for example when an associated object such as a
             /// DDS sample needs to be returned to DDS.
             void* handle;
-            
-            // Get I and Q values by pulse number and gate.
-            double i(int pulse, int gate) const { 
-                switch (dataType) {
-                    case FLOATDATA:
-                        return(static_cast<float*>(IQbeams[pulse])[2 * gate]);
-                    case SHORTDATA:
-                        return(static_cast<short*>(IQbeams[pulse])[2 * gate]);
-                    default:
-                        std::cerr << "Attempt to extract data from " <<
-                            "AScope::TimeSeries with data type unset!" << std::endl;
-                        abort();
-                }
-            }
-            
-            double q(int pulse, int gate) const {
-                switch (dataType) {
-                  case FLOATDATA:
-                    return(static_cast<float*>(IQbeams[pulse])[2 * gate + 1]);
-                  case SHORTDATA:
-                    return(static_cast<short*>(IQbeams[pulse])[2 * gate + 1]);
-                  default:
-                    std::cerr << "Attempt to extract data from " <<
-                    "AScope::TimeSeries with data type unset!" << std::endl;
-                    abort();
-                }
-            }
         };
         
         /// TimeSeries subclasses for short* and float* data pointers
@@ -134,8 +141,12 @@ class AScope : public QWidget, private Ui::AScope {
             FloatTimeSeries() : TimeSeries(TimeSeries::FLOATDATA) {}
         };
 
-        AScope(
-                QWidget* parent = 0);
+        /// Constructor
+        /// @param refreshRateHz The rate at which we want the display to
+        /// update. Data will be (nominally) collected at this rate.
+        /// @param parent The parent widget.
+        AScope(double refreshRateHz = 25, QWidget* parent = 0);
+        /// Destructor
         virtual ~AScope();
 
     signals:
@@ -155,21 +166,16 @@ class AScope : public QWidget, private Ui::AScope {
         /// must determine which of the two families of
         /// plots, _tsPlotInfo, or _productPlotInfo, the
         /// previous and new plot types belong to.
-        virtual void plotTypeSlot(
-                int plotType);
+        virtual void plotTypeSlot(int plotType);
         /// call to save the current plotting parameters for the
         /// current plot type, and reload the parameters for the
         /// the new plot type.
-        void plotTypeChange(
-                PlotInfo* pi,
-                    TS_PLOT_TYPES plotType);
+        void plotTypeChange(PlotInfo* pi, TS_PLOT_TYPES plotType);
         /// A different tab has been selected. Change the plot type to the
         /// currently selected button on that tab.
-        void tabChangeSlot(
-                QWidget* w);
+        void tabChangeSlot(QWidget* w);
         /// The gain knob value has changed.
-        virtual void gainChangeSlot(
-                double);
+        virtual void gainChangeSlot(double);
         /// slide the plot up.
         virtual void upSlot();
         /// Slide the plot down.
@@ -181,36 +187,37 @@ class AScope : public QWidget, private Ui::AScope {
         void saveImageSlot();
         /// Pause the plotting. Any received data are ignored.
         /// @param p True to enable pause.
-        void pauseSlot(
-                bool p);
+        void pauseSlot(bool p);
         /// Select the channel
         /// @param c The channel (0-3)
-        void channelSlot(
-                int c);
+        void channelSlot(int c);
         /// Select the gate
         /// @param index The index from the combo box of the selected gate.
-        void gateChoiceSlot(
-                int index);
+        void gateChoiceSlot(int index);
         /// Select the block size
         /// @param size The block size. It must be a power of two.
-        void blockSizeSlot(
-                int size);
+        void blockSizeSlot(int size);
         /// Enable/disable windowing
         void windowSlot(bool);
+        /// Select long beam display
+        void alongBeamSlot(bool);
 
     protected:
-        /// Initialize the fft calculations. The minimum
-        /// size is 8. The max size is time series length
-        /// to the largest power of 2.
-        /// Fftw plans and data arrays are allocated for all
-        /// powers of two within this range. The block size
-        /// combo selector is initialized.
-        void initFFT(int tsLength);
+        /// Initialize the block size choices. The minimum
+        /// size will be 32. The max size will be 4096.
+        /// @todo allow the max (and min?) block sizes to
+        /// be confiurable.
+        void initBlockSizes();
+        /// Allocate the fftw space and create then plan.
+        /// Existing space and plan are returned first.
+        /// Set up the hammimg window coefficients.
+        /// @param size The fft length.
+        void initFFT(int size);
         /// Initialize the gate selection 
-        /// @param gates The number of gates
+        /// @param gates The number of gates.
         void initGates(int gates);
         /// Initialize the channel selection
-        /// @param channels The number of channels
+        /// @param channels The number of channels.
 		void initChans(int channels);
         /// Emit a signal announcing the desired gate mode,
         /// either along beam, or one gate. The channel select,
@@ -219,20 +226,11 @@ class AScope : public QWidget, private Ui::AScope {
         void dataMode();
         /// Send the data for the current plot type to the ScopePlot.
         void displayData();
-        /// setup the hamming coefficients
-        void hammingSetup();
-        /// apply the hamming filter
+        /// Setup the hamming coefficients.
+        /// @param size The number of coefficients.
+        void hammingSetup(int size);
+        /// Apply the hamming filter.
         void doHamming();
-        ///	cumulative error count
-        int _errorCount[3];
-        ///  last pulse number
-        long long _lastPulseNum[3];
-        double _knobGain;
-        double _knobOffset;
-        double _xyGraphRange;
-        double _xyGraphCenter;
-        double _specGraphRange;
-        double _specGraphCenter;
         /// Autoscale based on a set of data.
         /// @param data The data series to be analyzed.
         /// @param displayType The ScopePlot::PLOTTYPE of the display
@@ -245,66 +243,26 @@ class AScope : public QWidget, private Ui::AScope {
         /// @param displayType The ScopePlot::PLOTTYPE of the display
         void autoScale(
                 std::vector<double>& data1,
-                    std::vector<double>& data2,
-                    ScopePlot::PLOTTYPE displayType);
+                std::vector<double>& data2,
+                ScopePlot::PLOTTYPE displayType);
         /// Initialize the combo box choices and FFTs.
         /// @param channels The number of channels,
-        /// @param tsLength The time series length
         /// @param gates The number of gates
-        void initCombos(int channels, int tsLength, int gates);
+        void initCombos(int channels, int gates);
         /// Adjust the _graphRange and _graphOffset values.
         /// @param min Desired scale minimum
         /// @param max Desired scale maximum
         /// @param displayType The ScopePlot::PLOTTYPE of the display
         void adjustGainOffset(
                 double min,
-                    double max,
-                    ScopePlot::PLOTTYPE displayType);
-        /// save the button group for each tab,
-        /// so that we can find the selected button
-        /// and change the plot type when tabs are switched.
-        std::vector<QButtonGroup*> _tabButtonGroups;
-        /// This set contains PLOTTYPEs for all raw data plots
-        std::set<TS_PLOT_TYPES> _pulsePlots;
-        /// Holds I data to display for time series and I vs. Q
-        std::vector<double> I;
-        /// Holds Q data to display for time series and I vs. Q display
-        std::vector<double> Q;
-        /// Holds power spectrum values for display.
-        std::vector<double> _spectrum;
-        // how often to update the statistics (in seconds)
-        int _statsUpdateInterval;
-        /// Set true if time series plots are selected, false for product type plots
-        bool _timeSeriesPlot;
-        /// The current selected plot type.
-        TS_PLOT_TYPES _tsPlotType;
-        // The builtin timer will be used to calculate beam statistics.
-        void timerEvent(
-                QTimerEvent*);
-        /// The hamming window coefficients
-        std::vector<double> _hammingCoefs;
-        /// The index of the current fft/block size
-        /// selection in _blockSizeChoices
-        int _blockSizeIndex;
-        /// The possible block/fftw size choices.
-        std::vector<int> _blockSizeChoices;
-        ///	The fftw plan. This is a handle used by
-        ///	the fftw routines.
-        std::vector<fftw_plan> _fftwPlan;
-        ///	The fftw data array. The fft will
-        //	be performed in place, so both input data
-        ///	and results are stored here.
-        std::vector<fftw_complex*> _fftwData;
-        //	power correction factor applied to (uncorrected) powerSpectrum() output
-        double _powerCorrection;
-        /// Set true if the Hamming window should be applied
-        bool _doHamming;
+                double max,
+                ScopePlot::PLOTTYPE displayType);
         /// Process time series data.
         /// @param Idata The I values
         /// @param Qdata The Q values
         void processTimeSeries(
                 std::vector<double>& Idata,
-                    std::vector<double>& Qdata);
+                std::vector<double>& Qdata);
         /// Compute the power spectrum. The input values will come
         /// I[]and Q[], the power spectrum will be written to
         /// _spectrum[]
@@ -313,11 +271,7 @@ class AScope : public QWidget, private Ui::AScope {
         /// @return The zero moment
         double powerSpectrum(
                 std::vector<double>& Idata,
-                    std::vector<double>& Qdata);
-        /// For each TS_PLOT_TYPES, there will be an entry in this map.
-        std::map<TS_PLOT_TYPES, PlotInfo> _tsPlotInfo;
-        /// This set contains PLOTTYPEs for all timeseries plots
-        std::set<TS_PLOT_TYPES> _timeSeriesPlots;
+                std::vector<double>& Qdata);
         /// initialize all of the book keeping structures
         /// for the various plots.
         void initPlots();
@@ -332,12 +286,55 @@ class AScope : public QWidget, private Ui::AScope {
         /// belong to.
         QButtonGroup* addTSTypeTab(
                 std::string tabName,
-                    std::set<TS_PLOT_TYPES> types);
+                std::set<TS_PLOT_TYPES> types);
         /// Calculate the zeroth moment, using the time
         /// series for input.
         double zeroMomentFromTimeSeries(
                 std::vector<double>& I,
-                    std::vector<double>& Q);
+                std::vector<double>& Q);
+       // The builtin timer will be used to calculate beam statistics.
+        void timerEvent(QTimerEvent*);
+        /// For each TS_PLOT_TYPES, there will be an entry in this map.
+        std::map<TS_PLOT_TYPES, PlotInfo> _tsPlotInfo;
+        /// This set contains PLOTTYPEs for all timeseries plots
+        std::set<TS_PLOT_TYPES> _timeSeriesPlots;
+        /// save the button group for each tab,
+        /// so that we can find the selected button
+        /// and change the plot type when tabs are switched.
+        std::vector<QButtonGroup*> _tabButtonGroups;
+        /// This set contains PLOTTYPEs for all raw data plots
+        std::set<TS_PLOT_TYPES> _pulsePlots;
+        /// Holds I data to display for time series and I vs. Q
+        std::vector<double> I;
+        /// Holds Q data to display for time series and I vs. Q display
+        std::vector<double> Q;
+        /// Holds power spectrum values for display.
+        std::vector<double> _spectrum;
+        // how often to update the display
+        int _refreshIntervalHz;
+        /// Set true when a plot is chosen which shows results
+        /// from IQ data. If a plot of products is chosen,
+        /// it is false.
+        bool _IQplot;
+        /// The current selected plot type.
+        TS_PLOT_TYPES _tsPlotType;
+         /// The hamming window coefficients
+        std::vector<double> _hammingCoefs;
+        /// The possible block/fftw size choices.
+        std::vector<int> _blockSizeChoices;
+        ///	The fftw plan. This is a handle used by
+        ///	the fftw routines.
+        //std::vector<fftw_plan> _fftwPlan;
+        fftw_plan _fftwPlan;
+        ///	The fftw data array. The fft will
+        //	be performed in place, so both input data
+        ///	and results are stored here.
+        //std::vector<fftw_complex*> _fftwData;
+        fftw_complex* _fftwData;
+        //	power correction factor applied to (uncorrected) powerSpectrum() output
+        double _powerCorrection;
+        /// Set true if the Hamming window should be applied
+        bool _doHamming;
         /// The configuration for AScope
         QtConfig _config;
         /// The button group for channel selection
@@ -358,7 +355,31 @@ class AScope : public QWidget, private Ui::AScope {
         /// Set false to cause initialization of blocksize and 
         /// gate choices when the first data is received.
         bool _combosInitialized;
-       
+        /// Set true if data are to be taken along the beam. Otherwise
+        /// data are taken at the specified gate
+        bool _alongBeam;
+        ///	cumulative error count
+        int _errorCount[3];
+        ///  last pulse number
+        long long _lastPulseNum[3];
+        double _knobGain;
+        double _knobOffset;
+        double _xyGraphRange;
+        double _xyGraphCenter;
+        double _specGraphRange;
+        double _specGraphCenter;
+        // storage to collect incoming I values
+    	std::vector<double> _I;
+        // storage to collect incoming Q values
+    	std::vector<double> _Q;
+    	// the next index of the incoming location to fill in _I and _Q
+    	unsigned int _nextIQ;
+    	/// The number of gates. Initially zero, it is diagnosed from the data stream
+    	int _gates;
+        /// The current block size
+        unsigned int _blockSize;
+        /// set true when we want to start capturing the next incoming data
+        bool _capture;
 };
 
 

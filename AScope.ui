@@ -5,26 +5,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1185</width>
-    <height>925</height>
+    <width>922</width>
+    <height>718</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>AScope</string>
   </property>
-  <layout class="QHBoxLayout" >
-   <property name="margin" >
-    <number>9</number>
-   </property>
-   <property name="spacing" >
-    <number>6</number>
-   </property>
+  <layout class="QHBoxLayout" name="horizontalLayout_2" >
    <item>
-    <widget class="ScopePlot" name="_scopePlot" >
+    <widget class="ScopePlot" native="1" name="_scopePlot" >
      <property name="sizePolicy" >
-      <sizepolicy>
-       <hsizetype>3</hsizetype>
-       <vsizetype>3</vsizetype>
+      <sizepolicy vsizetype="MinimumExpanding" hsizetype="MinimumExpanding" >
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -38,27 +30,19 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" >
-     <property name="margin" >
-      <number>0</number>
-     </property>
-     <property name="spacing" >
-      <number>6</number>
-     </property>
+    <layout class="QVBoxLayout" name="verticalLayout_2" >
      <item>
       <layout class="QHBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
        <property name="spacing" >
         <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
        </property>
        <item>
         <widget class="QGroupBox" name="_chanBox" >
          <property name="sizePolicy" >
-          <sizepolicy>
-           <hsizetype>1</hsizetype>
-           <vsizetype>1</vsizetype>
+          <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -77,9 +61,7 @@
        <item>
         <widget class="QGroupBox" name="groupBox_5" >
          <property name="sizePolicy" >
-          <sizepolicy>
-           <hsizetype>1</hsizetype>
-           <vsizetype>5</vsizetype>
+          <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -88,18 +70,16 @@
           <string>Product</string>
          </property>
          <layout class="QHBoxLayout" >
-          <property name="margin" >
-           <number>9</number>
-          </property>
           <property name="spacing" >
            <number>6</number>
+          </property>
+          <property name="margin" >
+           <number>9</number>
           </property>
           <item>
            <widget class="QTabWidget" name="_typeTab" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>1</vsizetype>
+             <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -107,7 +87,7 @@
             <property name="minimumSize" >
              <size>
               <width>200</width>
-              <height>300</height>
+              <height>200</height>
              </size>
             </property>
             <property name="maximumSize" >
@@ -132,27 +112,13 @@
       </layout>
      </item>
      <item>
-      <layout class="QHBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
-       <property name="spacing" >
-        <number>6</number>
-       </property>
+      <layout class="QHBoxLayout" name="horizontalLayout" >
        <item>
-        <layout class="QVBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
-         <property name="spacing" >
-          <number>6</number>
-         </property>
+        <layout class="QVBoxLayout" name="verticalLayout" >
          <item>
           <widget class="QGroupBox" name="groupBox_2" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>1</hsizetype>
-             <vsizetype>5</vsizetype>
+            <sizepolicy vsizetype="MinimumExpanding" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -160,34 +126,11 @@
            <property name="title" >
             <string>Display Mode</string>
            </property>
-           <layout class="QGridLayout" >
-            <property name="margin" >
-             <number>9</number>
-            </property>
-            <property name="spacing" >
-             <number>6</number>
-            </property>
-            <item row="3" column="1" >
-             <widget class="QComboBox" name="_gateNumber" >
-              <property name="sizePolicy" >
-               <sizepolicy>
-                <hsizetype>1</hsizetype>
-                <vsizetype>0</vsizetype>
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip" >
-               <string>Select the gate for the one gate display.</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0" >
+           <layout class="QFormLayout" name="formLayout" >
+            <item row="0" column="0" >
              <widget class="QLabel" name="label" >
               <property name="sizePolicy" >
-               <sizepolicy>
-                <hsizetype>1</hsizetype>
-                <vsizetype>5</vsizetype>
+               <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -200,27 +143,23 @@
               </property>
              </widget>
             </item>
-            <item row="4" column="1" >
-             <widget class="QComboBox" name="_blockSizeCombo" >
+            <item row="0" column="1" >
+             <widget class="QComboBox" name="_gateNumber" >
               <property name="sizePolicy" >
-               <sizepolicy>
-                <hsizetype>1</hsizetype>
-                <vsizetype>0</vsizetype>
+               <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="toolTip" >
-               <string>Set the number of samples for one gate mode.</string>
+               <string>Select the gate for the one gate display.</string>
               </property>
              </widget>
             </item>
-            <item row="4" column="0" >
+            <item row="1" column="0" >
              <widget class="QLabel" name="label_2" >
               <property name="sizePolicy" >
-               <sizepolicy>
-                <hsizetype>1</hsizetype>
-                <vsizetype>5</vsizetype>
+               <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -233,23 +172,41 @@
               </property>
              </widget>
             </item>
+            <item row="1" column="1" >
+             <widget class="QComboBox" name="_blockSizeCombo" >
+              <property name="sizePolicy" >
+               <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip" >
+               <string>Set the number of samples for one gate mode.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0" >
+             <widget class="QCheckBox" name="_alongBeamCheck" >
+              <property name="text" >
+               <string>Along Beam</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
          <item>
           <layout class="QHBoxLayout" >
-           <property name="margin" >
-            <number>0</number>
-           </property>
            <property name="spacing" >
             <number>6</number>
+           </property>
+           <property name="margin" >
+            <number>0</number>
            </property>
            <item>
             <widget class="QLabel" name="label_3" >
              <property name="sizePolicy" >
-              <sizepolicy>
-               <hsizetype>1</hsizetype>
-               <vsizetype>5</vsizetype>
+              <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -265,9 +222,7 @@
            <item>
             <widget class="QLabel" name="_powerDB" >
              <property name="sizePolicy" >
-              <sizepolicy>
-               <hsizetype>1</hsizetype>
-               <vsizetype>5</vsizetype>
+              <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -286,18 +241,16 @@
        </item>
        <item>
         <layout class="QVBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
          <property name="spacing" >
           <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>0</number>
          </property>
          <item>
           <widget class="QCheckBox" name="_windowButton" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>1</hsizetype>
-             <vsizetype>1</vsizetype>
+            <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -313,9 +266,7 @@
          <item>
           <widget class="QCheckBox" name="_pauseButton" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>1</hsizetype>
-             <vsizetype>1</vsizetype>
+            <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -331,9 +282,7 @@
          <item>
           <widget class="QCheckBox" name="_xGrid" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>1</hsizetype>
-             <vsizetype>5</vsizetype>
+            <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -352,9 +301,7 @@
          <item>
           <widget class="QCheckBox" name="_yGrid" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>1</hsizetype>
-             <vsizetype>5</vsizetype>
+            <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -376,18 +323,16 @@
      </item>
      <item>
       <layout class="QHBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
        <property name="spacing" >
         <number>6</number>
+       </property>
+       <property name="margin" >
+        <number>0</number>
        </property>
        <item>
         <widget class="QPushButton" name="_autoScale" >
          <property name="sizePolicy" >
-          <sizepolicy>
-           <hsizetype>1</hsizetype>
-           <vsizetype>1</vsizetype>
+          <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -414,26 +359,24 @@
      </item>
      <item>
       <layout class="QHBoxLayout" >
-       <property name="margin" >
-        <number>0</number>
-       </property>
        <property name="spacing" >
         <number>6</number>
        </property>
+       <property name="margin" >
+        <number>0</number>
+       </property>
        <item>
         <layout class="QVBoxLayout" >
-         <property name="margin" >
-          <number>0</number>
-         </property>
          <property name="spacing" >
           <number>6</number>
+         </property>
+         <property name="margin" >
+          <number>0</number>
          </property>
          <item>
           <widget class="QToolButton" name="_up" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>0</hsizetype>
-             <vsizetype>3</vsizetype>
+            <sizepolicy vsizetype="MinimumExpanding" hsizetype="Fixed" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -464,9 +407,7 @@
          <item>
           <widget class="QToolButton" name="_dn" >
            <property name="sizePolicy" >
-            <sizepolicy>
-             <hsizetype>0</hsizetype>
-             <vsizetype>3</vsizetype>
+            <sizepolicy vsizetype="MinimumExpanding" hsizetype="Fixed" >
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -497,11 +438,9 @@
         </layout>
        </item>
        <item>
-        <widget class="Knob" name="_gainKnob" >
+        <widget class="Knob" native="1" name="_gainKnob" >
          <property name="sizePolicy" >
-          <sizepolicy>
-           <hsizetype>1</hsizetype>
-           <vsizetype>1</vsizetype>
+          <sizepolicy vsizetype="Minimum" hsizetype="Minimum" >
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -528,9 +467,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox" >
        <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>1</hsizetype>
-         <vsizetype>5</vsizetype>
+        <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -539,11 +476,11 @@
         <string>Pulse Statistics</string>
        </property>
        <layout class="QVBoxLayout" >
-        <property name="margin" >
-         <number>9</number>
-        </property>
         <property name="spacing" >
          <number>6</number>
+        </property>
+        <property name="margin" >
+         <number>9</number>
         </property>
         <item>
          <layout class="QGridLayout" >
@@ -556,9 +493,7 @@
           <item row="3" column="4" >
            <widget class="QLabel" name="_chan2led" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -595,9 +530,7 @@
           <item row="3" column="1" >
            <widget class="QLabel" name="_chan2pulseCount" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -616,9 +549,7 @@
           <item row="2" column="3" >
            <widget class="QLabel" name="_chan1errors" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -637,9 +568,7 @@
           <item row="1" column="0" >
            <widget class="QLabel" name="textLabel1_5" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -658,9 +587,7 @@
           <item row="1" column="3" >
            <widget class="QLabel" name="_chan0errors" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -679,9 +606,7 @@
           <item row="2" column="1" >
            <widget class="QLabel" name="_chan1pulseCount" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -700,9 +625,7 @@
           <item row="3" column="0" >
            <widget class="QLabel" name="textLabel1_5_3" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -721,9 +644,7 @@
           <item row="0" column="3" >
            <widget class="QLabel" name="textLabel3_3" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -742,9 +663,7 @@
           <item row="1" column="1" >
            <widget class="QLabel" name="_chan0pulseCount" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -763,9 +682,7 @@
           <item row="1" column="4" >
            <widget class="QLabel" name="_chan0led" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -802,9 +719,7 @@
           <item row="0" column="4" >
            <widget class="QLabel" name="textLabel1" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -820,9 +735,7 @@
           <item row="3" column="3" >
            <widget class="QLabel" name="_chan2errors" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -841,9 +754,7 @@
           <item row="0" column="0" >
            <widget class="QLabel" name="textLabel4" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -862,9 +773,7 @@
           <item row="2" column="0" >
            <widget class="QLabel" name="textLabel1_5_2" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -883,9 +792,7 @@
           <item row="0" column="2" >
            <widget class="QLabel" name="textLabel3_2" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -904,9 +811,7 @@
           <item row="3" column="2" >
            <widget class="QLabel" name="_chan2pulseRate" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -925,9 +830,7 @@
           <item row="1" column="2" >
            <widget class="QLabel" name="_chan0pulseRate" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -946,9 +849,7 @@
           <item row="2" column="4" >
            <widget class="QLabel" name="_chan1led" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -985,9 +886,7 @@
           <item row="0" column="1" >
            <widget class="QLabel" name="textLabel3" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -1006,9 +905,7 @@
           <item row="2" column="2" >
            <widget class="QLabel" name="_chan1pulseRate" >
             <property name="sizePolicy" >
-             <sizepolicy>
-              <hsizetype>1</hsizetype>
-              <vsizetype>5</vsizetype>
+             <sizepolicy vsizetype="Preferred" hsizetype="Minimum" >
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -1032,9 +929,7 @@
      <item>
       <widget class="QProgressBar" name="_activityBar" >
        <property name="sizePolicy" >
-        <sizepolicy>
-         <hsizetype>1</hsizetype>
-         <vsizetype>0</vsizetype>
+        <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>

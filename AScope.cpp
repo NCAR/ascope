@@ -1,7 +1,6 @@
 #include "AScope.h"
 #include "ScopePlot.h"
 #include "Knob.h"
-//#include "SvnVersion.h"
 
 #include <QMessageBox>
 #include <QButtonGroup>
@@ -30,16 +29,30 @@
 #include <qwt_wheel.h>
 
 //////////////////////////////////////////////////////////////////////
-AScope::AScope(
-        QWidget* parent) :
+AScope::AScope(double refreshRateHz, QWidget* parent ) :
     QWidget(parent),
-    _statsUpdateInterval(5),
-            _timeSeriesPlot(TRUE), _config("NCAR", "AScope"),
-            _paused(false), _zeroMoment(0.0),
-            _channel(0), _gateChoice(0),
-            _combosInitialized(false){
+    _fftwData(0),
+    _blockSize(0),
+    _refreshIntervalHz(refreshRateHz),
+    _IQplot(TRUE),
+    _config("NCAR", "AScope"),
+    _paused(false),
+    _zeroMoment(0.0),
+    _channel(0),
+    _gateChoice(0),
+    _combosInitialized(false),
+    _alongBeam(false),
+    _nextIQ(0),
+    _gates(0),
+    _capture(true)
+{
     // Set up our form
     setupUi(this);
+
+    // Let's be reasonable with the refresh rate.
+    if (refreshRateHz < 1.0) {
+    	refreshRateHz = 1.0;
+    }
 
     // get our title from the coniguration
     std::string title = _config.getString("title", "AScope");
@@ -59,18 +72,20 @@ AScope::AScope(
 	_chanButtonGroup = new QButtonGroup;
 
     // connect the controls
-    connect(_autoScale, SIGNAL(released()), this, SLOT(autoScaleSlot()));
-    connect(_gainKnob, SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
-    connect(_up, SIGNAL(released()), this, SLOT(upSlot()));
-    connect(_dn, SIGNAL(released()), this, SLOT(dnSlot()));
-    connect(_saveImage, SIGNAL(released()), this, SLOT(saveImageSlot()));
-    connect(_pauseButton, SIGNAL(toggled(bool)), this, SLOT(pauseSlot(bool)));
-    connect(_windowButton, SIGNAL(toggled(bool)), this, SLOT(windowSlot(bool)));
-    connect(_gateNumber, SIGNAL(activated(int)), this, SLOT(gateChoiceSlot(int)));
+    connect(_autoScale,       SIGNAL(released()),           this, SLOT(autoScaleSlot()));
+    connect(_gainKnob,        SIGNAL(valueChanged(double)), this, SLOT(gainChangeSlot(double)));
+    connect(_up,              SIGNAL(released()),           this, SLOT(upSlot()));
+    connect(_dn,              SIGNAL(released()),           this, SLOT(dnSlot()));
+    connect(_saveImage,       SIGNAL(released()),           this, SLOT(saveImageSlot()));
+    connect(_pauseButton,     SIGNAL(toggled(bool)),        this, SLOT(pauseSlot(bool)));
+    connect(_windowButton,    SIGNAL(toggled(bool)),        this, SLOT(windowSlot(bool)));
+    connect(_gateNumber,      SIGNAL(activated(int)),       this, SLOT(gateChoiceSlot(int)));
+    connect(_alongBeamCheck,  SIGNAL(toggled(bool)),        this, SLOT(alongBeamSlot(bool)));
+    connect(_blockSizeCombo,  SIGNAL(activated(int)),       this, SLOT(blockSizeSlot(int)));
+    connect(_chanButtonGroup, SIGNAL(buttonReleased(int)),  this, SLOT(channelSlot(int)));
+
     connect(_xGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableXgrid(bool)));
     connect(_yGrid, SIGNAL(toggled(bool)), _scopePlot, SLOT(enableYgrid(bool)));
-    connect(_blockSizeCombo, SIGNAL(activated(int)), this, SLOT(blockSizeSlot(int)));
-    connect(_chanButtonGroup, SIGNAL(buttonReleased(int)), this, SLOT(channelSlot(int)));
 
     // set the checkbox selections
     _pauseButton->setChecked(false);
@@ -88,7 +103,7 @@ AScope::AScope(
     // set the minor ticks
     _gainKnob->setScaleMaxMajor(5);
     _gainKnob->setScaleMaxMinor(5);
-    
+
     // initialize the activity bar
     _activityBar->setRange(0, 100);
     _activityBar->setValue(0);
@@ -111,7 +126,7 @@ AScope::AScope(
 
 
     // start the statistics timer
-    startTimer(_statsUpdateInterval*1000);
+    startTimer(1000/_refreshIntervalHz);
 
     // let the data sources get themselves ready
     sleep(1);
@@ -122,18 +137,18 @@ AScope::~AScope() {
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::initCombos(int channels, int tsLength, int gates) {
+void AScope::initCombos(int channels, int gates) {
+
 	// initialize the fft numerics
-	initFFT(tsLength);
+	initBlockSizes();
 
 	// initialize the number of gates.
 	initGates(gates);
 
 	// initialize the channels
 	initChans(channels);
-
-
 }
+
 //////////////////////////////////////////////////////////////////////
 void AScope::initGates(int gates) {
 	// populate the gate selection combo box
@@ -169,39 +184,45 @@ void AScope::initChans(int channels) {
 	}
 }
 //////////////////////////////////////////////////////////////////////
-void AScope::initFFT(int tsLength) {
+void AScope::initBlockSizes() {
 
     // configure the block/fft size selection
     /// @todo add logic to insure that smallest fft size is a power of two.
     int fftSize = 8;
-    int maxFftSize = (int) pow(2, floor(log2(tsLength)));
+    int maxFftSize = 4096;
     for (; fftSize <= maxFftSize; fftSize = fftSize*2) {
         _blockSizeChoices.push_back(fftSize);
         QString l = QString("%1").arg(fftSize);
         _blockSizeCombo->addItem(l, QVariant(fftSize));
     }
 
-    // select the last choice for the block size
-    _blockSizeIndex = (_blockSizeChoices.size()-1);
-    _blockSizeCombo->setCurrentIndex(_blockSizeIndex);
+    // initialize items that depend on the block size selection
+    // (fftw and hamming coefficients)
+    _blockSizeCombo->setCurrentIndex(5);
+    blockSizeSlot(5);
 
-    //  set up fft for power calculations:
-    _fftwData.resize(_blockSizeChoices.size());
-    _fftwPlan.resize(_blockSizeChoices.size());
-    for (unsigned int i = 0; i < _blockSizeChoices.size(); i++) {
-        // allocate the data space for fftw
-        int blockSize = _blockSizeChoices[i];
-        _fftwData[i] = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)
-                * blockSize);
-        // create the plan.
-        _fftwPlan[i] = fftw_plan_dft_1d(blockSize, _fftwData[i], _fftwData[i],
-        FFTW_FORWARD,
-        FFTW_ESTIMATE);
-    }
-
-    // create the hamming coefficients
-    hammingSetup();
 }
+
+//////////////////////////////////////////////////////////////////////
+void AScope::initFFT(int size) {
+
+	// return existing structures, if we have them
+	if (_fftwData) {
+		fftw_destroy_plan(_fftwPlan);
+		fftw_free(_fftwData);
+	}
+
+	// allocate space
+	_fftwData = (fftw_complex*)fftw_malloc(sizeof(fftw_complex)* size);
+
+	// create the plan.
+	_fftwPlan = fftw_plan_dft_1d(size, _fftwData, _fftwData,
+			FFTW_FORWARD,
+			FFTW_ESTIMATE);
+
+	hammingSetup(size);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 void AScope::saveImageSlot() {
@@ -229,19 +250,23 @@ void AScope::saveImageSlot() {
 }
 //////////////////////////////////////////////////////////////////////
 void AScope::processTimeSeries(
-        std::vector<double>& Idata, std::vector<double>& Qdata) {
-    if (!_timeSeriesPlot)
+        std::vector<double>& Idata,
+        std::vector<double>& Qdata) {
+
+	// if we are not plotting time series, ignore
+    if (!_IQplot)
         return;
 
     PlotInfo* pi = &_tsPlotInfo[_tsPlotType];
     switch (pi->getDisplayType()) {
+    // power spectrum plot
     case ScopePlot::SPECTRUM: {
-
         // compute the power spectrum
         _zeroMoment = powerSpectrum(Idata, Qdata);
         displayData();
         break;
     }
+    // I Q in time or I versus Q
     case SCOPE_PLOT_TIMESERIES:
     case SCOPE_PLOT_IVSQ: {
         I.resize(Idata.size());
@@ -261,7 +286,7 @@ void AScope::processTimeSeries(
 //////////////////////////////////////////////////////////////////////
 void AScope::displayData() {
     double yBottom = _xyGraphCenter - _xyGraphRange;
-    double yTop = _xyGraphCenter + _xyGraphRange;
+    double yTop    = _xyGraphCenter + _xyGraphRange;
 
     QString l = QString("%1").arg(_zeroMoment, 6, 'f', 1);
     _powerDB->setText(l);
@@ -293,83 +318,84 @@ void AScope::displayData() {
             autoScale(_spectrum, displayType);
             pi->autoscale(false);
         }
-        _scopePlot->Spectrum(_spectrum, _specGraphCenter-_specGraphRange
-                /2.0, _specGraphCenter+_specGraphRange/2.0, 1000000, false,
-                "Frequency (Hz)", "Power (dB)");
+        _scopePlot->Spectrum(
+        		_spectrum,
+        		_specGraphCenter -_specGraphRange/2.0,
+        		_specGraphCenter +_specGraphRange/2.0,
+        		1000000,
+        		false,
+                "Frequency (Hz)",
+                "Power (dB)");
         break;
     case ScopePlot::PRODUCT:
-        // include just to quiet compiler warnings
+        // include just to quiet compiler warnings. Someday
+    	// we will be plotting products
         break;
     }
 }
 
 //////////////////////////////////////////////////////////////////////
 double AScope::powerSpectrum(
-        std::vector<double>& Idata, std::vector<double>& Qdata) {
+        std::vector<double>& Idata,
+        std::vector<double>& Qdata) {
 
-    int blockSize = _blockSizeChoices[_blockSizeIndex];
+    _spectrum.resize(_blockSize);
 
-    _spectrum.resize(blockSize);
-    int n = Idata.size();
-    if (blockSize < n) {
-        n = blockSize;
-    }
+    unsigned int n = (Idata.size() <_blockSize) ? Idata.size(): _blockSize;
     for (int j = 0; j < n; j++) {
         // transfer the data to the fftw input space
-        _fftwData[_blockSizeIndex][j][0] = Idata[j];
-        _fftwData[_blockSizeIndex][j][1] = Qdata[j];
+        _fftwData[j][0] = Idata[j];
+        _fftwData[j][1] = Qdata[j];
     }
-    // zero pad, if we are looking at along beam data.
-    for (int j = n; j < blockSize; j++) {
-        _fftwData[_blockSizeIndex][j][0] = 0;
-        _fftwData[_blockSizeIndex][j][1] = 0;
+    // zero pad if necessary
+    for (int j = n; j < _blockSize; j++) {
+        _fftwData[j][0] = 0;
+        _fftwData[j][1] = 0;
     }
 
     // apply the hamming window to the time series
-    if (_doHamming)
+    if (_doHamming) {
         doHamming();
+    }
 
     // caclulate the fft
-    fftw_execute(_fftwPlan[_blockSizeIndex]);
+    fftw_execute(_fftwPlan);
 
     double zeroMoment = 0.0;
 
     // reorder and copy the results into _spectrum
-    for (int i = 0; i < blockSize/2; i++) {
-        double pow = _fftwData[_blockSizeIndex][i][0]
-                * _fftwData[_blockSizeIndex][i][0]
-                + _fftwData[_blockSizeIndex][i][1]
-                        * _fftwData[_blockSizeIndex][i][1];
+    for (int i = 0; i < _blockSize/2; i++) {
+        double pow =
+           _fftwData[i][0] * _fftwData[i][0] +
+           _fftwData[i][1] * _fftwData[i][1];
 
         zeroMoment += pow;
 
-        pow /= blockSize*blockSize;
+        pow /= _blockSize*_blockSize;
         pow = 10.0*log10(pow);
-        _spectrum[i+blockSize/2] = pow;
+        _spectrum[i+_blockSize/2] = pow;
     }
 
-    for (int i = blockSize/2; i < blockSize; i++) {
-        double pow = _fftwData[_blockSizeIndex][i][0]
-                * _fftwData[_blockSizeIndex][i][0]
-                + _fftwData[_blockSizeIndex][i][1]
-                        * _fftwData[_blockSizeIndex][i][1];
+    for (int i = _blockSize/2; i < _blockSize; i++) {
+        double pow =
+           _fftwData[i][0] * _fftwData[i][0] +
+           _fftwData[i][1] * _fftwData[i][1];
 
         zeroMoment += pow;
 
-        pow /= blockSize*blockSize;
+        pow /= _blockSize*_blockSize;
         pow = 10.0*log10(pow);
-        _spectrum[i - blockSize/2] = pow;
+        _spectrum[i - _blockSize/2] = pow;
     }
 
-    zeroMoment /= blockSize*blockSize;
+    zeroMoment /= _blockSize*_blockSize;
     zeroMoment = 10.0*log10(zeroMoment);
 
     return zeroMoment;
 }
 
 ////////////////////////////////////////////////////////////////////
-void AScope::plotTypeSlot(
-        int plotType) {
+void AScope::plotTypeSlot(int plotType) {
 
     // find out the index of the current page
     int pageNum = _typeTab->currentIndex();
@@ -384,8 +410,7 @@ void AScope::plotTypeSlot(
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::tabChangeSlot(
-        QWidget* w) {
+void AScope::tabChangeSlot(QWidget* w) {
     // find out the index of the current page
     int pageNum = _typeTab->currentIndex();
 
@@ -400,7 +425,8 @@ void AScope::tabChangeSlot(
 
 ////////////////////////////////////////////////////////////////////
 void AScope::plotTypeChange(
-        PlotInfo* pi, TS_PLOT_TYPES newPlotType) {
+        PlotInfo* pi,
+        TS_PLOT_TYPES newPlotType) {
 
     // save the gain and offset of the current plot type
     PlotInfo* currentPi;
@@ -451,7 +477,8 @@ void AScope::initPlots() {
 
 //////////////////////////////////////////////////////////////////////
 QButtonGroup* AScope::addTSTypeTab(
-        std::string tabName, std::set<TS_PLOT_TYPES> types) {
+        std::string tabName,
+        std::set<TS_PLOT_TYPES> types) {
     // The page that will be added to the tab widget
     QWidget* pPage = new QWidget;
     // the layout manager for the page, will contain the buttons
@@ -492,9 +519,8 @@ QButtonGroup* AScope::addTSTypeTab(
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::timerEvent(
-        QTimerEvent*) {
-
+void AScope::timerEvent(QTimerEvent*) {
+	_capture = true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -516,7 +542,7 @@ void AScope::gainChangeSlot(
 void AScope::upSlot() {
     bool spectrum = false;
 
-    if (_timeSeriesPlot) {
+    if (_IQplot) {
         PlotInfo* pi = &_tsPlotInfo[_tsPlotType];
         if (pi->getDisplayType() == ScopePlot::SPECTRUM) {
             spectrum = true;
@@ -536,7 +562,7 @@ void AScope::dnSlot() {
 
     bool spectrum = false;
 
-    if (_timeSeriesPlot) {
+    if (_IQplot) {
         PlotInfo* pi = &_tsPlotInfo[_tsPlotType];
         if (pi->getDisplayType() == ScopePlot::SPECTRUM) {
             spectrum = true;
@@ -554,8 +580,10 @@ void AScope::dnSlot() {
 
 //////////////////////////////////////////////////////////////////////
 void AScope::autoScale(
-        std::vector<double>& data, ScopePlot::PLOTTYPE displayType) {
-    if (data.size() == 0)
+        std::vector<double>& data,
+        ScopePlot::PLOTTYPE displayType) {
+
+	if (data.size() == 0)
         return;
 
     // find the min and max
@@ -568,8 +596,10 @@ void AScope::autoScale(
 
 //////////////////////////////////////////////////////////////////////
 void AScope::autoScale(
-        std::vector<double>& data1, std::vector<double>& data2,
+        std::vector<double>& data1,
+        std::vector<double>& data2,
         ScopePlot::PLOTTYPE displayType) {
+
     if (data1.size() == 0 || data2.size() == 0)
         return;
 
@@ -584,12 +614,14 @@ void AScope::autoScale(
 
     // adjust the gains
     adjustGainOffset(min, max, displayType);
-
 }
 
 //////////////////////////////////////////////////////////////////////
 void AScope::adjustGainOffset(
-        double min, double max, ScopePlot::PLOTTYPE displayType) {
+        double min,
+        double max,
+        ScopePlot::PLOTTYPE displayType) {
+
     if (displayType == ScopePlot::SPECTRUM) {
         // currently in spectrum plot mode
         _specGraphCenter = min + (max-min)/2.0;
@@ -611,39 +643,52 @@ void AScope::adjustGainOffset(
     }
 }
 
-
 //////////////////////////////////////////////////////////////////////
 void
 AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 
 	int chanId = pItem.chanId;
 	int tsLength = pItem.IQbeams.size();
-    int gates = pItem.gates;
+    _gates = pItem.gates;
 
 	if (!_combosInitialized) {
-		initCombos(4, tsLength, gates);
+		// initialize the combo selectors
+		initCombos(4, _gates);
 		_combosInitialized = true;
+
 	}
 
-	if (chanId == _channel && !_paused) {
-		int blockSize = _blockSizeChoices[_blockSizeIndex];
-		std::vector<double> I, Q;
-		I.resize(blockSize);
-		Q.resize(blockSize);
-
+	if (chanId == _channel && !_paused && _capture) {
         // extract the time series from the DDS sample
-        for (int t = 0; t < blockSize; t++) {
-            I[t] = pItem.i(t, _gateChoice);
-            Q[t] = pItem.q(t, _gateChoice);
+        if (_alongBeam) {
+        	for (int i = 0; i < _gates; i++)  {
+        		_I[_nextIQ] = pItem.i(0, _nextIQ);
+        		_Q[_nextIQ] = pItem.q(0, _nextIQ);
+        		_nextIQ++;
+        	}
+        } else {
+        	for (int t = 0; t < tsLength; t++) {
+        		_I[_nextIQ] = pItem.i(t, _gateChoice);
+        		_Q[_nextIQ] = pItem.q(t, _gateChoice);
+        		_nextIQ++;
+        		if (_nextIQ == _I.size()) {
+        			break;
+        		}
+        	}
         }
 
-		// process the time series
-		processTimeSeries(I, Q);
+		// now see if we have collected enough samples
+        if (_nextIQ == _I.size()) {
+			// process the time series
+			processTimeSeries(_I, _Q);
+			_nextIQ = 0;
+			_capture = false;
+		}
 	}
 
 	// return the DDS item
 	emit returnTSItem(pItem);
-	
+
 	// bump the activity bar
 	_activityBar->setValue((_activityBar->value()+1) % 100);
 }
@@ -664,33 +709,38 @@ void AScope::pauseSlot(
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::channelSlot(
-        int c) {
+void AScope::channelSlot(int c) {
     _channel = c;
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::gateChoiceSlot(
-        int index) {
+void AScope::gateChoiceSlot(int index) {
     _gateChoice = index;
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::blockSizeSlot(
-        int index) {
+void AScope::blockSizeSlot(int index) {
+    int size = _blockSizeChoices[index];
 
-	_blockSizeIndex = index;
+	// Reconfigure fftw if the size has changed
+	if (size != _blockSize) {
+		initFFT(size);
+		// save the size
+		_blockSize = size;
+	}
 
-    // recalculate the hamming coefficients. _blockSizeIndex
-	// must be set correctly before calling this
-    hammingSetup();
-
+	// If not in alongBeam mode, reconfigure _I and _Q capture
+	if (!_alongBeam) {
+		_I.resize(_blockSize);
+		_Q.resize(_blockSize);
+		_nextIQ = 0;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////
-
 double AScope::zeroMomentFromTimeSeries(
-        std::vector<double>& I, std::vector<double>& Q) {
+		std::vector<double>& I,
+		std::vector<double>& Q) {
     double p = 0;
     int n = I.size();
 
@@ -707,31 +757,89 @@ double AScope::zeroMomentFromTimeSeries(
 void
 AScope::doHamming() {
 
-  int blockSize = _blockSizeChoices[_blockSizeIndex];
-
-  for (int i = 0; i < blockSize; i++) {
-    _fftwData[_blockSizeIndex][i][0] *= _hammingCoefs[i];
-    _fftwData[_blockSizeIndex][i][1] *= _hammingCoefs[i];
+  for (int i = 0; i < _blockSize; i++) {
+    _fftwData[i][0] *= _hammingCoefs[i];
+    _fftwData[i][1] *= _hammingCoefs[i];
   }
 }
-////////////////////////////////////////////////////////////////////////
 
+////////////////////////////////////////////////////////////////////////
 void
-AScope::hammingSetup() {
+AScope::hammingSetup(int size) {
 
-   int blockSize = _blockSizeChoices[_blockSizeIndex];
+  _hammingCoefs.resize(size);
 
-  _hammingCoefs.resize(blockSize);
-
-  for (int i = 0; i < blockSize; i++) {
-    _hammingCoefs[i] = 0.54 - 0.46*(cos(2.0*M_PI*i/(blockSize-1)));
+  for (int i = 0; i < size; i++) {
+    _hammingCoefs[i] = 0.54 - 0.46*(cos(2.0*M_PI*i/(size-1)));
   }
 
 }
 
 ////////////////////////////////////////////////////////////////////////
-
 void
 AScope::windowSlot(bool flag) {
 	_doHamming = flag;
 }
+
+////////////////////////////////////////////////////////////////////////
+void
+AScope::alongBeamSlot(bool flag) {
+	_alongBeam = flag;
+
+	// If changing into alongBeam mode, set _I and _Q
+	// to the number of gates. Otherwise, set them to the
+	// blocksize.
+	if (_alongBeam) {
+		_I.resize(_gates);
+		_Q.resize(_gates);
+		_nextIQ = 0;
+		_gateNumber->setEnabled(false);
+	} else {
+		_I.resize(_blockSize);
+		_Q.resize(_blockSize);
+		_gateNumber->setEnabled(true);
+	}
+	_nextIQ = 0;
+}
+
+////////////////////////////////////////////////////////////////////////
+double AScope::TimeSeries::i(int pulse, int gate) const {
+    switch (dataType) {
+        case FLOATDATA:
+            return(static_cast<float*>(IQbeams[pulse])[2 * gate]);
+        case SHORTDATA:
+            return(static_cast<short*>(IQbeams[pulse])[2 * gate]);
+        default:
+            std::cerr << "Attempt to extract data from " <<
+                "AScope::TimeSeries with data type unset!" << std::endl;
+            abort();
+    }
+}
+
+////////////////////////////////////////////////////////////////////////
+AScope::TimeSeries::TimeSeries():
+dataType(VOIDDATA)
+{
+}
+
+////////////////////////////////////////////////////////////////////////
+AScope::TimeSeries::TimeSeries(TsDataTypeEnum type):
+dataType(type)
+{
+}
+
+////////////////////////////////////////////////////////////////////////
+double AScope::TimeSeries::q(int pulse, int gate) const {
+    switch (dataType) {
+      case FLOATDATA:
+        return(static_cast<float*>(IQbeams[pulse])[2 * gate + 1]);
+      case SHORTDATA:
+        return(static_cast<short*>(IQbeams[pulse])[2 * gate + 1]);
+      default:
+        std::cerr << "Attempt to extract data from " <<
+        "AScope::TimeSeries with data type unset!" << std::endl;
+        abort();
+    }
+}
+
+
