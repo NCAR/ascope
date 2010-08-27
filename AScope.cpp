@@ -44,7 +44,8 @@ AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
     _nextIQ(0),
     _gates(0),
     _capture(true),
-    _saveDir(saveDir)
+    _saveDir(saveDir),
+    _sampleRateHz(10.0e6)
 {
     // Set up our form
     setupUi(this);
@@ -321,7 +322,7 @@ void AScope::displayData() {
         		_spectrum,
         		_specGraphCenter -_specGraphRange/2.0,
         		_specGraphCenter +_specGraphRange/2.0,
-        		1000000,
+        		_sampleRateHz,
         		false,
                 "Frequency (Hz)",
                 "Power (dB)");
@@ -649,6 +650,7 @@ AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 	int chanId = pItem.chanId;
 	int tsLength = pItem.IQbeams.size();
     _gates = pItem.gates;
+    _sampleRateHz = pItem.sampleRateHz;
 
 	if (!_combosInitialized) {
 		// initialize the combo selectors
@@ -802,6 +804,19 @@ AScope::alongBeamSlot(bool flag) {
 }
 
 ////////////////////////////////////////////////////////////////////////
+AScope::TimeSeries::TimeSeries():
+dataType(VOIDDATA)
+{
+}
+
+////////////////////////////////////////////////////////////////////////
+AScope::TimeSeries::TimeSeries(TsDataTypeEnum type):
+dataType(type)
+{
+	sampleRateHz = 10.0e6;
+}
+
+////////////////////////////////////////////////////////////////////////
 double AScope::TimeSeries::i(int pulse, int gate) const {
     switch (dataType) {
         case FLOATDATA:
@@ -813,18 +828,6 @@ double AScope::TimeSeries::i(int pulse, int gate) const {
                 "AScope::TimeSeries with data type unset!" << std::endl;
             abort();
     }
-}
-
-////////////////////////////////////////////////////////////////////////
-AScope::TimeSeries::TimeSeries():
-dataType(VOIDDATA)
-{
-}
-
-////////////////////////////////////////////////////////////////////////
-AScope::TimeSeries::TimeSeries(TsDataTypeEnum type):
-dataType(type)
-{
 }
 
 ////////////////////////////////////////////////////////////////////////

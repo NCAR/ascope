@@ -120,6 +120,8 @@ class AScope : public QWidget, private Ui::AScope {
             int gates;
             /// The channel id
             int chanId;
+            /// The sample rate, in Hz
+            double sampleRateHz;
             /// An opaque pointer that can be used to store
             /// anything that the caller wants to track along 
             /// with the TimeSeries. This will be useful when 
@@ -383,6 +385,8 @@ class AScope : public QWidget, private Ui::AScope {
         bool _capture;
         /// The directory where images are saved.
         std::string _saveDir;
+        /// The sample rate in Hz.
+        double _sampleRateHz;
 };
 
 
