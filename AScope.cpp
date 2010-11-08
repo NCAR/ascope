@@ -34,7 +34,7 @@ AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
     _refreshIntervalHz(refreshRateHz),
     _IQplot(TRUE),
     _fftwData(0),
-    _blockSize(0),
+    _blockSize(64),
     _paused(false),
     _zeroMoment(0.0),
     _channel(0),
