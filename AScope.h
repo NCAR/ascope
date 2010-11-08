@@ -207,6 +207,9 @@ class AScope : public QWidget, private Ui::AScope {
         /// Select long beam display
         void alongBeamSlot(bool);
 
+        /// Get the current block size
+        unsigned int getBlockSize() const { return _blockSize; }
+
     protected:
         /// Initialize the block size choices. The minimum
         /// size will be 32. The max size will be 4096.
