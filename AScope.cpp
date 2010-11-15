@@ -267,8 +267,8 @@ void AScope::processTimeSeries(
         break;
     }
     // I Q in time or I versus Q
-    case SCOPE_PLOT_TIMESERIES:
-    case SCOPE_PLOT_IVSQ: {
+    case ScopePlot::TIMESERIES:
+    case ScopePlot::IVSQ: {
         I.resize(Idata.size());
         Q.resize(Qdata.size());
         I = Idata;
@@ -453,12 +453,12 @@ void AScope::initPlots() {
     _pulsePlots.insert(TS_SPECTRUM_PLOT);
 
     _tsPlotInfo[TS_TIMESERIES_PLOT] = PlotInfo(TS_TIMESERIES_PLOT,
-            SCOPE_PLOT_TIMESERIES, "I and Q", "S:  I and Q", -5.0, 5.0, 0.0,
+            ScopePlot::TIMESERIES, "I and Q", "S:  I and Q", -5.0, 5.0, 0.0,
             -5.0, 5.0, 0.0);
-    _tsPlotInfo[TS_IVSQ_PLOT] = PlotInfo(TS_IVSQ_PLOT, SCOPE_PLOT_IVSQ,
+    _tsPlotInfo[TS_IVSQ_PLOT] = PlotInfo(TS_IVSQ_PLOT, ScopePlot::IVSQ,
             "I vs Q", "S:  I vs Q", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
     _tsPlotInfo[TS_SPECTRUM_PLOT] = PlotInfo(TS_SPECTRUM_PLOT,
-            SCOPE_PLOT_SPECTRUM, "Power Spectrum", "S:  Power Spectrum", -5.0,
+            ScopePlot::SPECTRUM, "Power Spectrum", "S:  Power Spectrum", -5.0,
             5.0, 0.0, -5.0, 5.0, 0.0);
 
     // remove the one tab that was put there by designer

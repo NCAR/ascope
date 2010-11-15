@@ -73,13 +73,6 @@
  **/
 class AScope : public QWidget, private Ui::AScope {
     Q_OBJECT
-        /// types of all plots for displaying both
-        /// time series and product data.
-        enum SCOPE_PLOT_TYPES {
-            SCOPE_PLOT_TIMESERIES,
-            SCOPE_PLOT_IVSQ,
-            SCOPE_PLOT_SPECTRUM
-        };
 
         /// Time series plot types.
         enum TS_PLOT_TYPES {
