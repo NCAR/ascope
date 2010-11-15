@@ -74,11 +74,13 @@
 class AScope : public QWidget, private Ui::AScope {
     Q_OBJECT
 
-        /// Time series plot types.
+        /// Time series plot types.Exactly one of these type
+        /// plots will be created.
         enum TS_PLOT_TYPES {
-            TS_TIMESERIES_PLOT, ///<  time series I and Q plot
-            TS_IVSQ_PLOT,       ///<  time series I versus Q plot
-            TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
+            TS_AMPLITUDE_PLOT=100,  ///<  time series amplitude plot
+            TS_IANDQ_PLOT=101,      ///<  time series I and Q plot
+            TS_IVSQ_PLOT=102,       ///<  time series I versus Q plot
+            TS_SPECTRUM_PLOT=103    ///<  time series power spectrum plot
         };
         
      public:
@@ -234,18 +236,18 @@ class AScope : public QWidget, private Ui::AScope {
         void doHamming();
         /// Autoscale based on a set of data.
         /// @param data The data series to be analyzed.
-        /// @param displayType The ScopePlot::PLOTTYPE of the display
+        /// @param displayType The type of plot that the data is scaled for.
         void autoScale(
                 std::vector<double>& data,
-                ScopePlot::PLOTTYPE displayType);
+                TS_PLOT_TYPES displayType);
         /// Autoscale based on two sets of data.
         /// @param data1 The first data series to be analyzed.
         /// @param data2 The second data series to be analyzed.
-        /// @param displayType The ScopePlot::PLOTTYPE of the display
+        /// @param displayType The type of plot that the data is scaled for.
         void autoScale(
                 std::vector<double>& data1,
                 std::vector<double>& data2,
-                ScopePlot::PLOTTYPE displayType);
+                TS_PLOT_TYPES displayType);
         /// Initialize the combo box choices and FFTs.
         /// @param channels The number of channels,
         /// @param gates The number of gates
@@ -253,11 +255,11 @@ class AScope : public QWidget, private Ui::AScope {
         /// Adjust the _graphRange and _graphOffset values.
         /// @param min Desired scale minimum
         /// @param max Desired scale maximum
-        /// @param displayType The ScopePlot::PLOTTYPE of the display
+        /// @param displayType The type of plot that the data is scaled for.
         void adjustGainOffset(
                 double min,
                 double max,
-                ScopePlot::PLOTTYPE displayType);
+                TS_PLOT_TYPES displayType);
         /// Process time series data.
         /// @param Idata The I values
         /// @param Qdata The Q values
@@ -305,9 +307,11 @@ class AScope : public QWidget, private Ui::AScope {
         std::vector<QButtonGroup*> _tabButtonGroups;
         /// This set contains PLOTTYPEs for all raw data plots
         std::set<TS_PLOT_TYPES> _pulsePlots;
-        /// Holds I data to display for time series and I vs. Q
+        /// Holds Y data to display for  TimeSeries display
+        std::vector<double> Y;
+        /// Holds I data to display for  I vs. Q
         std::vector<double> I;
-        /// Holds Q data to display for time series and I vs. Q display
+        /// Holds Q data to display for I vs. Q display
         std::vector<double> Q;
         /// Holds power spectrum values for display.
         std::vector<double> _spectrum;

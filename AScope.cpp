@@ -117,7 +117,7 @@ AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
     _redPalette.setColor(this->backgroundRole(), QColor("red"));
 
     // The initial plot type will be I and Q timeseries
-    plotTypeSlot(TS_TIMESERIES_PLOT);
+    plotTypeSlot(TS_IANDQ_PLOT);
 
 
     // start the statistics timer
@@ -257,23 +257,30 @@ void AScope::processTimeSeries(
     if (!_IQplot)
         return;
 
-    PlotInfo* pi = &_tsPlotInfo[_tsPlotType];
-    switch (pi->getDisplayType()) {
+    switch (_tsPlotType) {
     // power spectrum plot
-    case ScopePlot::SPECTRUM: {
+    case TS_SPECTRUM_PLOT: {
         // compute the power spectrum
         _zeroMoment = powerSpectrum(Idata, Qdata);
         displayData();
         break;
     }
     // I Q in time or I versus Q
-    case ScopePlot::TIMESERIES:
-    case ScopePlot::IVSQ: {
+    case TS_AMPLITUDE_PLOT:
+    	Y.resize(Idata.size());
+    	for (unsigned int i = 0; i < Y.size(); i++) {
+    		Y[i] = sqrt(Idata[i]*Idata[i] + Qdata[i]*Qdata[i]);
+    	}
+        _zeroMoment = zeroMomentFromTimeSeries(Idata, Qdata);
+        displayData();
+    	break;
+    case TS_IVSQ_PLOT:
+    case TS_IANDQ_PLOT:{
         I.resize(Idata.size());
         Q.resize(Qdata.size());
         I = Idata;
         Q = Qdata;
-        _zeroMoment = zeroMomentFromTimeSeries(I, Q);
+        _zeroMoment = zeroMomentFromTimeSeries(Idata, Qdata);
         displayData();
         break;
     }
@@ -295,25 +302,33 @@ void AScope::displayData() {
     PlotInfo* pi = &_tsPlotInfo[_tsPlotType];
 
     std::string xlabel;
-    ScopePlot::PLOTTYPE displayType =
-            (ScopePlot::PLOTTYPE) pi->getDisplayType();
+    TS_PLOT_TYPES displayType =
+            (TS_PLOT_TYPES) pi->getDisplayType();
     switch (displayType) {
-    case ScopePlot::TIMESERIES:
+    case TS_AMPLITUDE_PLOT:
+        if (pi->autoscale()) {
+            autoScale(Y, displayType);
+            pi->autoscale(false);
+        }
+        xlabel = std::string("Time");
+        _scopePlot->TimeSeries(Y, yBottom, yTop, 1, xlabel, "Amplitude");
+        break;
+    case TS_IANDQ_PLOT:
         if (pi->autoscale()) {
             autoScale(I, Q, displayType);
             pi->autoscale(false);
         }
         xlabel = std::string("Time");
-        _scopePlot->TimeSeries(I, Q, yBottom, yTop, 1, xlabel, "I - Q");
+        _scopePlot->IandQ(I, Q, yBottom, yTop, 1, xlabel, "I - Q");
         break;
-    case ScopePlot::IVSQ:
+    case TS_IVSQ_PLOT:
         if (pi->autoscale()) {
             autoScale(I, Q, displayType);
             pi->autoscale(false);
         }
         _scopePlot->IvsQ(I, Q, yBottom, yTop, 1, "I", "Q");
         break;
-    case ScopePlot::SPECTRUM:
+    case TS_SPECTRUM_PLOT:
         if (pi->autoscale()) {
             autoScale(_spectrum, displayType);
             pi->autoscale(false);
@@ -326,10 +341,6 @@ void AScope::displayData() {
         		false,
                 "Frequency (Hz)",
                 "Power (dB)");
-        break;
-    case ScopePlot::PRODUCT:
-        // include just to quiet compiler warnings. Someday
-    	// we will be plotting products
         break;
     }
 }
@@ -448,24 +459,24 @@ void AScope::plotTypeChange(
 ////////////////////////////////////////////////////////////////////
 void AScope::initPlots() {
 
-    _pulsePlots.insert(TS_TIMESERIES_PLOT);
+    _pulsePlots.insert(TS_AMPLITUDE_PLOT);
+    _pulsePlots.insert(TS_IANDQ_PLOT);
     _pulsePlots.insert(TS_IVSQ_PLOT);
     _pulsePlots.insert(TS_SPECTRUM_PLOT);
 
-    _tsPlotInfo[TS_TIMESERIES_PLOT] = PlotInfo(TS_TIMESERIES_PLOT,
-            ScopePlot::TIMESERIES, "I and Q", "S:  I and Q", -5.0, 5.0, 0.0,
-            -5.0, 5.0, 0.0);
-    _tsPlotInfo[TS_IVSQ_PLOT] = PlotInfo(TS_IVSQ_PLOT, ScopePlot::IVSQ,
-            "I vs Q", "S:  I vs Q", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
-    _tsPlotInfo[TS_SPECTRUM_PLOT] = PlotInfo(TS_SPECTRUM_PLOT,
-            ScopePlot::SPECTRUM, "Power Spectrum", "S:  Power Spectrum", -5.0,
-            5.0, 0.0, -5.0, 5.0, 0.0);
+    _tsPlotInfo[TS_AMPLITUDE_PLOT] = PlotInfo(1, TS_AMPLITUDE_PLOT, "I and Q", "Amplitude", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
+    _tsPlotInfo[TS_IANDQ_PLOT]     = PlotInfo(2, TS_IANDQ_PLOT, "I and Q", "I and Q", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
+    _tsPlotInfo[TS_IVSQ_PLOT]      = PlotInfo(3, TS_IVSQ_PLOT, "I vs Q", "I vs Q", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
+    _tsPlotInfo[TS_SPECTRUM_PLOT]  = PlotInfo(4, TS_SPECTRUM_PLOT, "Power Spectrum", "Power Spectrum", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
 
     // remove the one tab that was put there by designer
     _typeTab->removeTab(0);
 
     // add tabs, and save the button group for
-    // for each tab.
+    // for each tab. This code is here to support
+    // addition of new tabs for grouping display types,
+    // such as an I and Q tab, a Products tab, etc.
+    // Right now it is only creating an I and Q tab.
     QButtonGroup* pGroup;
 
     pGroup = addTSTypeTab("I & Q", _pulsePlots);
@@ -490,7 +501,7 @@ QButtonGroup* AScope::addTSTypeTab(
 
     for (i = types.begin(); i != types.end(); i++) {
         // create the radio button
-        int id = _tsPlotInfo[*i].getId();
+        int id = _tsPlotInfo[*i].getDisplayType();
         QRadioButton* pRadio = new QRadioButton;
         const QString label = _tsPlotInfo[*i].getLongName().c_str();
         pRadio->setText(label);
@@ -581,7 +592,7 @@ void AScope::dnSlot() {
 //////////////////////////////////////////////////////////////////////
 void AScope::autoScale(
         std::vector<double>& data,
-        ScopePlot::PLOTTYPE displayType) {
+        AScope::TS_PLOT_TYPES displayType) {
 
 	if (data.size() == 0)
         return;
@@ -598,7 +609,7 @@ void AScope::autoScale(
 void AScope::autoScale(
         std::vector<double>& data1,
         std::vector<double>& data2,
-        ScopePlot::PLOTTYPE displayType) {
+        AScope::TS_PLOT_TYPES displayType) {
 
     if (data1.size() == 0 || data2.size() == 0)
         return;
@@ -620,9 +631,9 @@ void AScope::autoScale(
 void AScope::adjustGainOffset(
         double min,
         double max,
-        ScopePlot::PLOTTYPE displayType) {
+        AScope::TS_PLOT_TYPES displayType) {
 
-    if (displayType == ScopePlot::SPECTRUM) {
+    if (displayType == TS_SPECTRUM_PLOT) {
         // currently in spectrum plot mode
         _specGraphCenter = min + (max-min)/2.0;
         _specGraphRange = 3*(max-min);
