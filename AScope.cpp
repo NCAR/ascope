@@ -855,4 +855,9 @@ double AScope::TimeSeries::q(int pulse, int gate) const {
     }
 }
 
+//////////////////////////////////////////////////////////////////////
+QFrame* AScope::userFrame() {
+	return _userFrame;
+}
+
 

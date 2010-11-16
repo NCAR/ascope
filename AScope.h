@@ -70,6 +70,9 @@
  chosen, the I and Q data are collected and then a power spectrum is
  computed. And so on. This work is done in newTSItemSlot(), and then
  the collected data are sent on to proper display method.
+
+ A small QFrame in the controls area is provided for users to add their
+ own status widgets, branding, etc.
  **/
 class AScope : public QWidget, private Ui::AScope {
     Q_OBJECT
@@ -148,6 +151,11 @@ class AScope : public QWidget, private Ui::AScope {
         		QWidget* parent = 0);
         /// Destructor
         virtual ~AScope();
+        /// @return The user frame, available for adding your
+        /// own interface elements. Putting large widgets
+        /// in this area will really mess up the overall
+        /// layout of the scope.
+        QFrame* userFrame();
 
     signals:
 		/// emit this signal to alert the client that we
