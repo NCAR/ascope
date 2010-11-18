@@ -28,7 +28,8 @@ _gainMax(gainMax),
 _gainCurrent(gainCurrent),
 _offsetMin(offsetMin),
 _offsetMax(offsetMax),
-_offsetCurrent(offsetCurrent)
+_offsetCurrent(offsetCurrent),
+_autoscale(true)
 {
 }
 
