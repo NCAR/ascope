@@ -80,10 +80,10 @@ class AScope : public QWidget, private Ui::AScope {
         /// Time series plot types.Exactly one of these type
         /// plots will be created.
         enum TS_PLOT_TYPES {
-            TS_AMPLITUDE_PLOT=100,  ///<  time series amplitude plot
-            TS_IANDQ_PLOT=101,      ///<  time series I and Q plot
-            TS_IVSQ_PLOT=102,       ///<  time series I versus Q plot
-            TS_SPECTRUM_PLOT=103    ///<  time series power spectrum plot
+            TS_AMPLITUDE_PLOT,  ///<  time series amplitude plot
+            TS_IANDQ_PLOT,      ///<  time series I and Q plot
+            TS_IVSQ_PLOT,       ///<  time series I versus Q plot
+            TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
         };
         
      public:
