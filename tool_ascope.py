@@ -26,7 +26,7 @@ AScope.h
 PlotInfo.h
 """)
 
-html = env.Apidocs(sources + headers, DOXYFILE_FILE = "Doxyfile")
+html = env.Apidocs(sources + headers, DOXYFILE_DICT={'PROJECT_NAME':'ascope', 'PROJECT_NUMBER':'1.0'})
 
 ascope = env.Library('ascope', sources)
 
