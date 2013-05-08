@@ -674,6 +674,9 @@ AScope::newTSItemSlot(AScope::TimeSeries pItem) {
 	if (chanId == _channel && !_paused && _capture) {
         // extract the time series from the DDS sample
         if (_alongBeam) {
+		_I.resize(_gates);
+		_Q.resize(_gates);
+		_nextIQ = 0;
         	for (int i = 0; i < _gates; i++)  {
         		_I[_nextIQ] = pItem.i(0, _nextIQ);
         		_Q[_nextIQ] = pItem.q(0, _nextIQ);
