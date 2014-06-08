@@ -367,7 +367,7 @@ double AScope::powerSpectrum(
 
     // apply the hamming window to the time series
     if (_doHamming) {
-        doHamming();
+      doHamming();
     }
 
     // caclulate the fft
@@ -376,31 +376,25 @@ double AScope::powerSpectrum(
     double zeroMoment = 0.0;
 
     // reorder and copy the results into _spectrum
-    for (unsigned int i = 0; i < _blockSize/2; i++) {
-        double pow =
-           _fftwData[i][0] * _fftwData[i][0] +
-           _fftwData[i][1] * _fftwData[i][1];
+    
+    int nHalf = _blockSize / 2;
+    double nSq = (double) _blockSize * (double) _blockSize;
 
-        zeroMoment += pow;
+    for (unsigned int i = 0; i < _blockSize; i++) {
 
-        pow /= _blockSize*_blockSize;
-        pow = 10.0*log10(pow);
-        _spectrum[i+_blockSize/2] = pow;
-    }
+      double pow =
+        _fftwData[i][0] * _fftwData[i][0] +
+        _fftwData[i][1] * _fftwData[i][1];
+      
+      zeroMoment += pow;
+      
+      pow /= nSq;
+      pow = 10.0*log10(pow);
+      _spectrum[(i + nHalf) % _blockSize] = pow;
 
-    for (unsigned int i = _blockSize/2; i < _blockSize; i++) {
-        double pow =
-           _fftwData[i][0] * _fftwData[i][0] +
-           _fftwData[i][1] * _fftwData[i][1];
+    } // i
 
-        zeroMoment += pow;
-
-        pow /= _blockSize*_blockSize;
-        pow = 10.0*log10(pow);
-        _spectrum[i - _blockSize/2] = pow;
-    }
-
-    zeroMoment /= _blockSize*_blockSize;
+    zeroMoment /= nSq;
     zeroMoment = 10.0*log10(zeroMoment);
 
     return zeroMoment;
