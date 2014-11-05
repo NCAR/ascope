@@ -19,14 +19,15 @@ env.Uic4(['AScope.ui',])
 sources = Split("""
 AScope.cpp
 PlotInfo.cpp
-""")
+""") 
 
 headers = Split("""
 AScope.h
 PlotInfo.h
 """)
 
-html = env.Apidocs(sources + headers, DOXYFILE_DICT={'PROJECT_NAME':'ascope', 'PROJECT_NUMBER':'1.0', 'GENERATE_LATEX':'NO'})
+env['DOXYFILE_DICT'].update({'PROJECT_NAME':'Ascope'})
+html = env.Apidocs(sources + headers)
 
 ascope = env.Library('ascope', sources)
 
