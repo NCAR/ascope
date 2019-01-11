@@ -31,7 +31,7 @@ html = env.Apidocs(sources + headers)
 
 ascope = env.Library('ascope', sources)
 
-Default(ascope, html)
+Default(ascope)
 
 tooldir = env.Dir('.').srcnode().abspath    # this directory
 
