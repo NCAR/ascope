@@ -56,7 +56,7 @@
 AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
     QWidget(parent),
     _refreshIntervalHz(refreshRateHz),
-    _IQplot(TRUE),
+    _IQplot(true),
     _fftwData(0),
     _blockSize(64),
     _paused(false),
@@ -661,10 +661,10 @@ void AScope::adjustGainOffset(
         _xyGraphCenter = (min+max)/2.0;
         _xyGraphRange = (1/factor)*(max - min)/2.0;
         if (min == max ||
-        		isnan(min) ||
-        		isnan(max) ||
-        		isinf(min) ||
-        		isinf(max))
+			std::isnan(min) ||
+			std::isnan(max) ||
+			std::isinf(min) ||
+			std::isinf(max))
         	_xyGraphRange = 1.0;
         //std::cout << "min:"<<min<<"  max:"<<max<<"     _xxGraphRange is " << _xyGraphRange << "\n";
         _knobGain = -log10(_xyGraphRange);
