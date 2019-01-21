@@ -1,7 +1,8 @@
 # -*- python -*-
 
 tools = Split("""
-qt4
+qtcore
+qtgui
 qtt_scopeplot
 qtt_knob
 doxygen
@@ -10,11 +11,8 @@ fftw
 
 env = Environment(tools = ['default'] + tools)
 
-qt4modules = ['QtCore','QtGui']
-env.EnableQt4Modules(qt4modules)
-
 # This will create ui_AScope.h
-env.Uic4(['AScope.ui',])
+env.Uic(['AScope.ui',])
 
 sources = Split("""
 AScope.cpp
