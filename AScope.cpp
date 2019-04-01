@@ -49,8 +49,16 @@
 
 #include <iostream>
 #include <time.h>
+#include <math.h>
 
 #include <qwt_wheel.h>
+
+#if __GNUC__ > 4
+using std::isnan;
+using std::isinf;
+using std::isinf;
+#endif
+
 
 //////////////////////////////////////////////////////////////////////
 AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
@@ -661,11 +669,11 @@ void AScope::adjustGainOffset(
         _xyGraphCenter = (min+max)/2.0;
         _xyGraphRange = (1/factor)*(max - min)/2.0;
         if (min == max ||
-			std::isnan(min) ||
-			std::isnan(max) ||
-			std::isinf(min) ||
-			std::isinf(max))
-        	_xyGraphRange = 1.0;
+	    isnan(min) ||
+	    isnan(max) ||
+	    isinf(min) ||
+	    isinf(max))
+	  _xyGraphRange = 1.0;
         //std::cout << "min:"<<min<<"  max:"<<max<<"     _xxGraphRange is " << _xyGraphRange << "\n";
         _knobGain = -log10(_xyGraphRange);
         _gainKnob->setValue(_knobGain);
