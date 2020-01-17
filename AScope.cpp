@@ -106,7 +106,7 @@ AScope::AScope(double refreshRateHz, std::string saveDir, QWidget* parent ) :
     connect(_saveImage,       SIGNAL(released()),           this, SLOT(saveImageSlot()));
     connect(_pauseButton,     SIGNAL(toggled(bool)),        this, SLOT(pauseSlot(bool)));
     connect(_windowButton,    SIGNAL(toggled(bool)),        this, SLOT(windowSlot(bool)));
-    connect(_gateNumber,      SIGNAL(activated(int)),       this, SLOT(gateChoiceSlot(int)));
+    connect(_gateNumber,      SIGNAL(valueChanged(int)),    this, SLOT(gateChoiceSlot(int)));
     connect(_alongBeamCheck,  SIGNAL(toggled(bool)),        this, SLOT(alongBeamSlot(bool)));
     connect(_blockSizeCombo,  SIGNAL(activated(int)),       this, SLOT(blockSizeSlot(int)));
     connect(_chanButtonGroup, SIGNAL(buttonReleased(int)),  this, SLOT(channelSlot(int)));
@@ -183,11 +183,9 @@ void AScope::initCombos(int channels, int gates) {
 
 //////////////////////////////////////////////////////////////////////
 void AScope::initGates(int gates) {
-	// populate the gate selection combo box
-	for (int g = 0; g < gates; g++) {
-        QString l = QString("%1").arg(g);
-		_gateNumber->addItem(l, QVariant(g));
-	}
+	// populate the gate selection spin box
+	_gateNumber->setMinimum(0);
+	_gateNumber->setMaximum(gates-1);
 }
 
 //////////////////////////////////////////////////////////////////////

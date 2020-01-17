@@ -145,7 +145,7 @@
              </widget>
             </item>
             <item row="0" column="1">
-             <widget class="QComboBox" name="_gateNumber">
+             <widget class="QSpinBox" name="_gateNumber">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
