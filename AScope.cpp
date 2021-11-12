@@ -304,6 +304,15 @@ void AScope::processTimeSeries(
         _zeroMoment = zeroMomentFromTimeSeries(Idata, Qdata);
         displayData();
     	break;
+    case TS_POWER_PLOT:
+        Y.resize(Idata.size());
+        for (unsigned int i = 0; i < Y.size(); i++) {
+            double sq = Idata[i]*Idata[i] + Qdata[i]*Qdata[i];
+            Y[i] = 10 * log10(std::max(sq, 1e-12));
+        }
+        _zeroMoment = zeroMomentFromTimeSeries(Idata, Qdata);
+        displayData();
+      break;
     case TS_IVSQ_PLOT:
     case TS_IANDQ_PLOT:{
         I.resize(Idata.size());
@@ -342,6 +351,14 @@ void AScope::displayData() {
         }
         xlabel = std::string("Time");
         _scopePlot->TimeSeries(Y, yBottom, yTop, 1, xlabel, "Amplitude");
+        break;
+    case TS_POWER_PLOT:
+        if (pi->autoscale()) {
+            autoScale(Y, displayType);
+            pi->autoscale(false);
+        }
+        xlabel = std::string("Time");
+        _scopePlot->TimeSeries(Y, yBottom, yTop, 1, xlabel, "Power");
         break;
     case TS_IANDQ_PLOT:
         if (pi->autoscale()) {
@@ -484,11 +501,13 @@ void AScope::plotTypeChange(
 void AScope::initPlots() {
 
     _pulsePlots.insert(TS_AMPLITUDE_PLOT);
+    _pulsePlots.insert(TS_POWER_PLOT);
     _pulsePlots.insert(TS_IANDQ_PLOT);
     _pulsePlots.insert(TS_IVSQ_PLOT);
     _pulsePlots.insert(TS_SPECTRUM_PLOT);
 
     _tsPlotInfo[TS_AMPLITUDE_PLOT] = PlotInfo(1, TS_AMPLITUDE_PLOT, "I and Q", "Amplitude", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
+    _tsPlotInfo[TS_POWER_PLOT]     = PlotInfo(1, TS_POWER_PLOT, "I and Q", "Power", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
     _tsPlotInfo[TS_IANDQ_PLOT]     = PlotInfo(2, TS_IANDQ_PLOT, "I and Q", "I and Q", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
     _tsPlotInfo[TS_IVSQ_PLOT]      = PlotInfo(3, TS_IVSQ_PLOT, "I vs Q", "I vs Q", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
     _tsPlotInfo[TS_SPECTRUM_PLOT]  = PlotInfo(4, TS_SPECTRUM_PLOT, "Power Spectrum", "Power Spectrum", -5.0, 5.0, 0.0, -5.0, 5.0, 0.0);
@@ -646,6 +665,11 @@ void AScope::autoScale(
     double max1 = *std::max_element(data1.begin(), data1.end());
     double max2 = *std::max_element(data2.begin(), data2.end());
     double max = std::max(max1, max2);
+
+    if (displayType == TS_IANDQ_PLOT || displayType == TS_IVSQ_PLOT) {
+        max = std::max(-min, max);
+        min = -max;
+    }
 
     // adjust the gains
     adjustGainOffset(min, max, displayType);

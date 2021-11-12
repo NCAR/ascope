@@ -104,6 +104,7 @@ class AScope : public QWidget, private Ui::AScope {
         /// plots will be created.
         enum TS_PLOT_TYPES {
             TS_AMPLITUDE_PLOT,  ///<  time series amplitude plot
+            TS_POWER_PLOT,      ///<  time series power plot
             TS_IANDQ_PLOT,      ///<  time series I and Q plot
             TS_IVSQ_PLOT,       ///<  time series I versus Q plot
             TS_SPECTRUM_PLOT    ///<  time series power spectrum plot
