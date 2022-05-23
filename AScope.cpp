@@ -263,7 +263,7 @@ void AScope::saveImageSlot() {
     d.setFileMode(QFileDialog::AnyFile);
     d.setViewMode(QFileDialog::Detail);
     d.setAcceptMode(QFileDialog::AcceptSave);
-    d.setConfirmOverwrite(true);
+    d.setOption(QFileDialog::DontConfirmOverwrite, false);
     d.setDefaultSuffix("png");
     d.setDirectory(f);
 
