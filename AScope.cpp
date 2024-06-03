@@ -447,7 +447,7 @@ double AScope::powerSpectrum(
 }
 
 ////////////////////////////////////////////////////////////////////
-void AScope::plotTypeSlot(int plotType) {
+void AScope::plotTypeSlot(int /*plotType*/) {
 
     // find out the index of the current page
     int pageNum = _typeTab->currentIndex();
@@ -462,7 +462,7 @@ void AScope::plotTypeSlot(int plotType) {
 }
 
 //////////////////////////////////////////////////////////////////////
-void AScope::tabChangeSlot(QWidget* w) {
+void AScope::tabChangeSlot(QWidget* /*w*/) {
     // find out the index of the current page
     int pageNum = _typeTab->currentIndex();
 
